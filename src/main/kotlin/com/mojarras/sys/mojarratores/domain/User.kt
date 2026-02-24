@@ -6,5 +6,5 @@ data class User(
     var name: String,
     var email: String,
     var password: String? = null,
-    var zipCode: String
+    var zipCode: String? = null
 )
