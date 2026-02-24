@@ -1,6 +1,8 @@
 package com.mojarras.sys.mojarratores.controllers
 
 import com.mojarras.sys.mojarratores.domain.User
+import com.mojarras.sys.mojarratores.domain.toUser
+import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest
 import com.mojarras.sys.mojarratores.dto.request.LoginRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,6 +16,18 @@ class UserController {
 
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
+    @PostMapping("/register")
+    fun register(
+        @RequestBody createUserRequest: CreateUserRequest
+    ): ResponseEntity<User> {
+
+        val newUser = createUserRequest.toUser()
+
+        logger.info("Usuario para agregar: $newUser")
+
+        return ResponseEntity.ok(newUser)
+    }
+
 
     @PostMapping("/login")
     fun login(
@@ -23,7 +37,8 @@ class UserController {
         val dummyUser = User(
             "1",
             "mojarra123",
-            "Mojarra Tilapia",
+            "Mojarra",
+            "Tilapia",
             "mojarra@frita.com",
             "mojarra123",
             "91900"
