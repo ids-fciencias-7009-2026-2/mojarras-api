@@ -56,5 +56,20 @@ class UserController {
         }
     }
 
+    @PostMapping("/logout")
+    @ResponseBody
+    fun logout(
+        @RequestBody userId: String 
+    ): ResponseEntity<LogoutResponse> {
+        
+        logger.info("Cerrando sesión para el ID: $userId")
+
+        val response = LogoutResponse(
+            userId = userId,
+            logoutDateTime = java.time.LocalDateTime.now().toString()
+        )
+
+        return ResponseEntity.ok(response)
+    }
 
 }
