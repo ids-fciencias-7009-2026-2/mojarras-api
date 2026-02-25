@@ -13,17 +13,19 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 @Controller
-@RequestMapping("/usuarios")
+@RequestMapping("/users")
 class UserController {
 
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
+
     @GetMapping("/me")
     fun retrieveUser(): ResponseEntity<User> {
 
         val dummyUser = User(
             "1",
             "mojarra123",
-            "Mojarra Tilapia",
+            "Mojarra",
+            "Tilapia",
             "mojarra@frita.com",
             "mojarra123",
             "91900"
@@ -33,6 +35,7 @@ class UserController {
 
         return ResponseEntity.ok(dummyUser)
     }
+
     @PostMapping("/register")
     fun register(
         @RequestBody createUserRequest: CreateUserRequest
@@ -40,11 +43,10 @@ class UserController {
 
         val newUser = createUserRequest.toUser()
 
-        logger.info("Usuario para agregar: $newUser")
+        logger.info("User to register: $newUser")
 
         return ResponseEntity.ok(newUser)
     }
-
 
     @PostMapping("/login")
     fun login(
@@ -83,7 +85,7 @@ class UserController {
         @RequestBody userId: String 
     ): ResponseEntity<LogoutResponse> {
         
-        logger.info("Cerrando sesión para el ID: $userId")
+        logger.info("Logging out of ID: $userId")
 
         val response = LogoutResponse(
             userId = userId,
@@ -100,23 +102,23 @@ class UserController {
     fun updateInfoUser(
         @RequestBody updateUserRequest: UpdateUserRequest
     ): ResponseEntity<Any>{
-        val user = User(
-            idUser = "1",
-            username = "mojarrita21",
-            firstName = "Mojarra",
-            lastName = "Tilapia",
-            email = "mojarra@frita.com",
-            password = "mojarra123",
-            zipCode = "9999"
+        val dummyUser = User(
+            "1",
+            "mojarrita21",
+            "Mojarra",
+            "Tilapia",
+            "mojarra@frita.com",
+            "mojarra123",
+            "9999"
         )
 
         logger.info("User found: \$user")
         logger.info("Info to update: $updateUserRequest")
 
-        user.email = updateUserRequest.email
-        user.password = updateUserRequest.password
+        dummyUser.email = updateUserRequest.email
+        dummyUser.password = updateUserRequest.password
 
-        return ResponseEntity.ok(user)
+        return ResponseEntity.ok(dummyUser)
     }
 
 }
