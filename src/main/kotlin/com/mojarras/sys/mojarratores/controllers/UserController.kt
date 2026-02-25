@@ -12,12 +12,18 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
+/**
+ * Controlador para endpoints del usuario
+ * */
 @Controller
 @RequestMapping("/users")
 class UserController {
 
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
+    /**
+     * Endpoint que simula acceder a mi usuario
+     * */
     @GetMapping("/me")
     fun retrieveUser(): ResponseEntity<User> {
 
