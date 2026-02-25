@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.controllers
 
+import com.mojarras.sys.mojarratores.dto.response.LogoutResponse
 import com.mojarras.sys.mojarratores.domain.User
 import com.mojarras.sys.mojarratores.domain.toUser
 import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest
