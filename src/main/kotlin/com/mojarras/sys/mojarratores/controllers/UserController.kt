@@ -36,6 +36,10 @@ class UserController {
         return ResponseEntity.ok(dummyUser)
     }
 
+
+    /**
+     * Endpoint que simula registrar un usuario
+     * */
     @PostMapping("/register")
     fun register(
         @RequestBody createUserRequest: CreateUserRequest
@@ -43,11 +47,14 @@ class UserController {
 
         val newUser = createUserRequest.toUser()
 
-        logger.info("User to register: $newUser")
+        logger.info("Usuario para agregar: $newUser")
 
         return ResponseEntity.ok(newUser)
     }
 
+    /**
+     * Endpoint que simula el logeo de un usuario
+     * */
     @PostMapping("/login")
     fun login(
         @RequestBody loginRequest: LoginRequest
