@@ -17,7 +17,22 @@ import org.springframework.web.bind.annotation.*
 class UserController {
 
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
+    @GetMapping("/me")
+    fun retrieveUser(): ResponseEntity<User> {
 
+        val dummyUser = User(
+            "1",
+            "mojarra123",
+            "Mojarra Tilapia",
+            "mojarra@frita.com",
+            "mojarra123",
+            "91900"
+        )
+
+        logger.info("User found in database: $dummyUser")
+
+        return ResponseEntity.ok(dummyUser)
+    }
     @PostMapping("/register")
     fun register(
         @RequestBody createUserRequest: CreateUserRequest
