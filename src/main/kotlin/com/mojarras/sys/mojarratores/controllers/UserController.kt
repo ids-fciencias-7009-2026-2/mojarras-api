@@ -3,6 +3,7 @@ package com.mojarras.sys.mojarratores.controllers
 import com.mojarras.sys.mojarratores.domain.User
 import com.mojarras.sys.mojarratores.domain.toUser
 import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest
+import com.mojarras.sys.mojarratores.dto.request.UpdateUserRequest
 import com.mojarras.sys.mojarratores.dto.request.LoginRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -70,6 +71,32 @@ class UserController {
         )
 
         return ResponseEntity.ok(response)
+    }
+
+    /**
+     *  Endpoint que simula la actualización de  un usuario
+     * */
+    @PutMapping
+    fun updateInfoUser(
+        @RequestBody updateUserRequest: UpdateUserRequest
+    ): ResponseEntity<Any>{
+        val user = User(
+            idUser = "1",
+            username = "mojarrita21",
+            firstName = "Mojarra",
+            lastName = "Tilapia",
+            email = "mojarra@frita.com",
+            password = "mojarra123",
+            zipCode = "9999"
+        )
+
+        logger.info("User found: \$user")
+        logger.info("Info to update: $updateUserRequest")
+
+        user.email = updateUserRequest.email
+        user.password = updateUserRequest.password
+
+        return ResponseEntity.ok(user)
     }
 
 }
