@@ -33,6 +33,10 @@ class UserController {
 
         return ResponseEntity.ok(dummyUser)
     }
+
+    /**
+     * Endpoint que simula registrar un usuario
+     * */
     @PostMapping("/register")
     fun register(
         @RequestBody createUserRequest: CreateUserRequest
