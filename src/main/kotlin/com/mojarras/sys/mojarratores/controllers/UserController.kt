@@ -57,6 +57,10 @@ class UserController {
         }
     }
 
+
+    /** 
+    * Endpoint que simula cerrar sesion del usuario
+    * */
     @PostMapping("/logout")
     @ResponseBody
     fun logout(
