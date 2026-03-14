@@ -6,11 +6,14 @@ import com.mojarras.sys.mojarratores.domain.toUser
 import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest
 import com.mojarras.sys.mojarratores.dto.request.UpdateUserRequest
 import com.mojarras.sys.mojarratores.dto.request.LoginRequest
+import com.mojarras.sys.mojarratores.services.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import java.security.MessageDigest
 
 /**
  * Controlador para endpoints del usuario
@@ -18,6 +21,9 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping("/users")
 class UserController {
+
+    @Autowired
+    lateinit var userService: UserService
 
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
@@ -44,7 +50,7 @@ class UserController {
 
 
     /**
-     * Endpoint que simula registrar un usuario
+     * Endpoint para registrar un usuario
      * */
     @PostMapping("/register")
     fun register(
@@ -53,9 +59,14 @@ class UserController {
 
         val newUser = createUserRequest.toUser()
 
-        logger.info("Usuario para agregar: $newUser")
+        val password = hashPassword(createUserRequest.password)
+        newUser.password = password
 
-        return ResponseEntity.ok(newUser)
+        val addedUser = userService.addNewUser(newUser)
+
+        logger.info("User added: $addedUser")
+
+        return ResponseEntity.ok(addedUser)
     }
 
     /**
@@ -132,6 +143,15 @@ class UserController {
         dummyUser.password = updateUserRequest.password
 
         return ResponseEntity.ok(dummyUser)
+    }
+
+
+
+    fun hashPassword(password: String): String {
+        val bytes = MessageDigest
+            .getInstance("SHA-256")
+            .digest(password.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 
 }
