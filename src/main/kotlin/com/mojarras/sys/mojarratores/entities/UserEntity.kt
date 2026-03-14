@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.entity
+package com.mojarras.sys.mojarratores.entities
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
