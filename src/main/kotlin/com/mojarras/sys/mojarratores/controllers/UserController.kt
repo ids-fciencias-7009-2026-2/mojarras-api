@@ -28,7 +28,7 @@ class UserController {
     fun retrieveUser(): ResponseEntity<User> {
 
         val dummyUser = User(
-            "1",
+            1,
             "mojarra123",
             "Mojarra",
             "Tilapia",
@@ -67,7 +67,7 @@ class UserController {
     ): ResponseEntity<Any> {
 
         val dummyUser = User(
-            "1",
+            1,
             "mojarra123",
             "Mojarra",
             "Tilapia",
@@ -116,7 +116,7 @@ class UserController {
         @RequestBody updateUserRequest: UpdateUserRequest
     ): ResponseEntity<Any>{
         val dummyUser = User(
-            "1",
+            1,
             "mojarrita21",
             "Mojarra",
             "Tilapia",
