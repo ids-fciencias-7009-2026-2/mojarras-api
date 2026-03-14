@@ -1,5 +1,23 @@
-CREATE TABLE Usuario ( id SERIAL PRIMARY KEY,
-                       nombre VARCHAR(100) NOT NULL,
-                       email VARCHAR(100) UNIQUE NOT NULL,
-                       password VARCHAR(20) NOT NULL,
-                       token VARCHAR(50) NOT NULL);
+CREATE TABLE users (
+                       id BIGSERIAL PRIMARY KEY,
+
+                       username VARCHAR(50) NOT NULL UNIQUE,
+
+                       first_name VARCHAR(100) NOT NULL,
+
+                       last_name VARCHAR(100) NOT NULL,
+
+                       email VARCHAR(150) NOT NULL UNIQUE,
+
+                       password VARCHAR(255),
+
+                       zip_code VARCHAR(10),
+
+                       token VARCHAR(255),
+
+                       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                       deleted_at TIMESTAMP NULL
+);

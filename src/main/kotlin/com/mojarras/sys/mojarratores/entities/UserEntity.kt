@@ -1,6 +1,11 @@
 package com.mojarras.sys.mojarratores.entity
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.time.LocalDateTime
 
 @Entity
@@ -11,29 +16,27 @@ data class UserEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true)
-    var username: String,
-
-    @Column(name = "first_name", nullable = false)
-    var firstName: String,
-
-    @Column(name = "last_name", nullable = false)
-    var lastName: String,
-
-    @Column(nullable = false, unique = true)
     var email: String,
 
     var password: String? = null,
+
+    var username: String,
+
+    @Column(name = "first_name")
+    var firstName: String,
+
+    @Column(name = "last_name")
+    var lastName: String,
 
     @Column(name = "zip_code")
     var zipCode: String? = null,
 
     var token: String? = null,
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     var createdAt: LocalDateTime = LocalDateTime.now(),
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     var updatedAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "deleted_at")

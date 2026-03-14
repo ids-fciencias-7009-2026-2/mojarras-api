@@ -6,11 +6,11 @@ import java.util.UUID
 fun CreateUserRequest.toUser(): User {
 
     return User(
+        email = this.email,
+        password = this.password,
         username = this.username,
         firstName = this.firstName,
         lastName = this.lastName,
-        email = this.email,
-        zipCode = this.zipCode,
-        password = this.password
+        zipCode = this.zipCode
     )
 }
