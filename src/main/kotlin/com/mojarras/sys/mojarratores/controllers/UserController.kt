@@ -28,24 +28,18 @@ class UserController {
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
     /**
-     * Endpoint que simula acceder a mi usuario
+     * Endpoint para consultar el usuario autenticado
      * */
     @GetMapping("/me")
-    fun retrieveUser(): ResponseEntity<User> {
+    fun retrieveUser(
+        @RequestHeader("Authorization") token: String
+    ): ResponseEntity<User> {
 
-        val dummyUser = User(
-            1,
-            "mojarra123",
-            "Mojarra",
-            "Tilapia",
-            "mojarra@frita.com",
-            "mojarra123",
-            "91900"
-        )
+        val user = userService.getMe(token)
+            ?: return ResponseEntity.status(401).build()
 
-        logger.info("User found in database: $dummyUser")
-
-        return ResponseEntity.ok(dummyUser)
+        logger.info("User found in database: $user")
+        return ResponseEntity.ok(user)
     }
 
 
@@ -70,33 +64,21 @@ class UserController {
     }
 
     /**
-     * Endpoint que simula el logeo de un usuario
+     * Endpoint para iniciar sesión
      * */
     @PostMapping("/login")
     fun login(
         @RequestBody loginRequest: LoginRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<User> {
 
-        val dummyUser = User(
-            1,
-            "mojarra123",
-            "Mojarra",
-            "Tilapia",
-            "mojarra@frita.com",
-            "mojarra123",
-            "91900"
-        )
-
-        logger.info("try make login with: $loginRequest")
-
-        return if (dummyUser.password == loginRequest.password) {
-            logger.info("Login successful")
-            ResponseEntity.ok(Any())
-
-        } else {
-            logger.error("Login failed")
-            ResponseEntity.status(401).build()
-        }
+        val hashedPassword = hashPassword(loginRequest.password)
+        val user = userService.login(loginRequest.email, hashedPassword)
+            ?: run{
+                logger.error("Login failed for: $loginRequest ")
+                return ResponseEntity.status(401).build()
+            }
+        logger.info("Login sccessful for: $loginRequest")
+        return ResponseEntity.ok(user)
     }
 
 
@@ -106,16 +88,20 @@ class UserController {
     @PostMapping("/logout")
     @ResponseBody
     fun logout(
-        @RequestBody userId: String 
+        @RequestHeader ("Authorization") token: String
     ): ResponseEntity<LogoutResponse> {
-        
-        logger.info("Logging out of ID: $userId")
 
+        val exit = userService.logout(token)
+
+        if (!exit) {
+            logger.error("Logout failed, token $token not found")
+            return ResponseEntity.status(401).build()
+        }
+        logger.info("Logout successful for $token")
         val response = LogoutResponse(
-            userId = userId,
+            userId = token,
             logoutDateTime = java.time.LocalDateTime.now().toString()
         )
-
         return ResponseEntity.ok(response)
     }
 
@@ -136,7 +122,7 @@ class UserController {
             "9999"
         )
 
-        logger.info("User found: \$user")
+        logger.info($$"User found: $user")
         logger.info("Info to update: $updateUserRequest")
 
         dummyUser.email = updateUserRequest.email
