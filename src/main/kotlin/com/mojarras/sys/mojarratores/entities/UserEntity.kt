@@ -16,17 +16,17 @@ data class UserEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    var email: String,
+    var email: String = "",
 
     var password: String? = null,
 
-    var username: String,
+    var username: String = "",
 
     @Column(name = "first_name")
-    var firstName: String,
+    var firstName: String = "",
 
     @Column(name = "last_name")
-    var lastName: String,
+    var lastName: String = "",
 
     @Column(name = "zip_code")
     var zipCode: String? = null,
