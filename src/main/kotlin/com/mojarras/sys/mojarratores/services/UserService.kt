@@ -19,11 +19,17 @@ class UserService {
     lateinit var userRepository: UserRepository
 
 
-    fun addNewUser(user: User): User {
+    fun addNewUser(user: User): User? {
+        val existingUser = userRepository.findByEmail(user.email)
+        if (existingUser != null) {
+            return null // email ya registrado
+        }
+
         val userEntity = user.toUserEntity()
         userRepository.save(userEntity)
-        user.password = "****"
-        return user
+        val savedUser = userEntity.toUser()
+        savedUser.password = "****"
+        return savedUser
     }
 
     fun login (email: String, password: String): User ?{
@@ -56,5 +62,25 @@ class UserService {
         return user
     }
 
+    fun updateUser(token: String, updateUser: User): User? {
+        val userEntity = userRepository.findByToken(token) ?: return null
+
+        // Verifica que el nuevo email no esté en uso por otro usuario
+        val existingUser = userRepository.findByEmail(updateUser.email)
+        if (existingUser != null && existingUser.id != userEntity.id) {
+            return null
+        }
+
+        userEntity.email = updateUser.email
+        if (!updateUser.password.isNullOrBlank()) {
+            userEntity.password = updateUser.password
+        }
+        userEntity.updatedAt = java.time.LocalDateTime.now()
+        userRepository.save(userEntity)
+
+        val user = userEntity.toUser()
+        user.password = "****"
+        return user
+    }
 
 }
