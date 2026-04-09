@@ -13,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import java.security.MessageDigest
+import java.time.LocalDateTime
 
 /**
  * Controlador para endpoints del usuario
  * */
-@Controller
+@RestController
 @RequestMapping("/users")
 class UserController {
 
@@ -53,13 +53,10 @@ class UserController {
 
         val newUser = createUserRequest.toUser()
 
-        val password = hashPassword(createUserRequest.password)
-        newUser.password = password
-
         val addedUser = userService.addNewUser(newUser)
+            ?: return ResponseEntity.status(409).build()
 
         logger.info("User added: $addedUser")
-
         return ResponseEntity.ok(addedUser)
     }
 
@@ -71,8 +68,7 @@ class UserController {
         @RequestBody loginRequest: LoginRequest
     ): ResponseEntity<User> {
 
-        val hashedPassword = hashPassword(loginRequest.password)
-        val user = userService.login(loginRequest.email, hashedPassword)
+        val user = userService.login(loginRequest.email, loginRequest.password)
             ?: run{
                 logger.error("Login failed for: $loginRequest ")
                 return ResponseEntity.status(401).build()
@@ -82,9 +78,9 @@ class UserController {
     }
 
 
-    /** 
-    * Endpoint que simula cerrar sesion del usuario
-    * */
+    /**
+     * Endpoint que simula cerrar sesion del usuario
+     * */
     @PostMapping("/logout")
     @ResponseBody
     fun logout(
@@ -100,7 +96,7 @@ class UserController {
         logger.info("Logout successful for $token")
         val response = LogoutResponse(
             userId = token,
-            logoutDateTime = java.time.LocalDateTime.now().toString()
+            logoutDateTime = LocalDateTime.now().toString()
         )
         return ResponseEntity.ok(response)
     }
@@ -109,35 +105,16 @@ class UserController {
      *  Endpoint que simula la actualización de  un usuario
      * */
     @PutMapping
-    fun updateInfoUser(
+    fun updateUser(
+        @RequestHeader("Authorization") token: String,
         @RequestBody updateUserRequest: UpdateUserRequest
-    ): ResponseEntity<Any>{
-        val dummyUser = User(
-            1,
-            "mojarrita21",
-            "Mojarra",
-            "Tilapia",
-            "mojarra@frita.com",
-            "mojarra123",
-            "9999"
-        )
+    ): ResponseEntity<User>{
+        val updatedUser = userService.updateUser(token, updateUserRequest)
+            ?: return ResponseEntity.status(409).build()
 
-        logger.info($$"User found: $user")
         logger.info("Info to update: $updateUserRequest")
 
-        dummyUser.email = updateUserRequest.email
-        dummyUser.password = updateUserRequest.password
-
-        return ResponseEntity.ok(dummyUser)
-    }
-
-
-
-    fun hashPassword(password: String): String {
-        val bytes = MessageDigest
-            .getInstance("SHA-256")
-            .digest(password.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
+        return ResponseEntity.ok(updatedUser)
     }
 
 }

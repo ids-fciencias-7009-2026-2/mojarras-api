@@ -2,12 +2,14 @@ package com.mojarras.sys.mojarratores.services
 
 import com.mojarras.sys.mojarratores.domain.User
 import com.mojarras.sys.mojarratores.domain.toUser
-import com.mojarras.sys.mojarratores.entities.UserEntity
+import com.mojarras.sys.mojarratores.dto.request.UpdateUserRequest
 import com.mojarras.sys.mojarratores.repositories.UserRepository
 import com.mojarras.sys.mojarratores.repositories.toUserEntity
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.security.MessageDigest
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -22,8 +24,10 @@ class UserService {
     fun addNewUser(user: User): User? {
         val existingUser = userRepository.findByEmail(user.email)
         if (existingUser != null) {
-            return null // email ya registrado
+            return null
         }
+
+        user.password = hashPassword(user.password)
 
         val userEntity = user.toUserEntity()
         userRepository.save(userEntity)
@@ -33,7 +37,9 @@ class UserService {
     }
 
     fun login (email: String, password: String): User ?{
-        val userEntity = userRepository.findUserByPasswordAndEmail(email, password)
+        val hashedPassword = hashPassword(password)
+
+        val userEntity = userRepository.findUserByPasswordAndEmail(email, hashedPassword)
             ?: return null
 
         val token = UUID.randomUUID().toString()
@@ -62,25 +68,54 @@ class UserService {
         return user
     }
 
-    fun updateUser(token: String, updateUser: User): User? {
+    fun updateUser(token: String, request: UpdateUserRequest): User? {
+
         val userEntity = userRepository.findByToken(token) ?: return null
 
-        // Verifica que el nuevo email no esté en uso por otro usuario
-        val existingUser = userRepository.findByEmail(updateUser.email)
-        if (existingUser != null && existingUser.id != userEntity.id) {
-            return null
+        if (!request.email.isNullOrBlank()) {
+
+            val existingUser = userRepository.findByEmail(request.email)
+
+            if (existingUser != null && existingUser.id != userEntity.id) {
+                return null
+            }
+
+            userEntity.email = request.email
         }
 
-        userEntity.email = updateUser.email
-        if (!updateUser.password.isNullOrBlank()) {
-            userEntity.password = updateUser.password
+        if (!request.password.isNullOrBlank()) {
+            userEntity.password = hashPassword(request.password)
         }
-        userEntity.updatedAt = java.time.LocalDateTime.now()
+
+        if (!request.username.isNullOrBlank()) {
+            userEntity.username = request.username
+        }
+
+        if (!request.firstName.isNullOrBlank()) {
+            userEntity.firstName = request.firstName
+        }
+
+        if (!request.lastName.isNullOrBlank()) {
+            userEntity.lastName = request.lastName
+        }
+
+        if (!request.zipCode.isNullOrBlank()) {
+            userEntity.zipCode = request.zipCode
+        }
+
+        userEntity.updatedAt = LocalDateTime.now()
         userRepository.save(userEntity)
 
         val user = userEntity.toUser()
         user.password = "****"
         return user
+    }
+
+    fun hashPassword(password: String?): String {
+        val bytes = MessageDigest
+            .getInstance("SHA-256")
+            .digest(password?.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 
 }
