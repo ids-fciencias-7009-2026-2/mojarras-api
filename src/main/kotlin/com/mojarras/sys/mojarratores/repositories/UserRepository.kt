@@ -14,6 +14,9 @@ interface UserRepository : CrudRepository<UserEntity, Long> {
     @Query("select u from UserEntity u where u.token = :token")
     fun findByToken(token: String): UserEntity?
 
+    @Query("select u from UserEntity u where u.email = :email")
+    fun findByEmail(email: String): UserEntity?
+
     @Query("select u from UserEntity u where u.email = :email and u.password = :password")
     fun findUserByPasswordAndEmail(email: String, password: String): UserEntity?
 
