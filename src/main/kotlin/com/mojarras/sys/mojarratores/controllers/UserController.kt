@@ -18,6 +18,7 @@ import java.time.LocalDateTime
 /**
  * Controlador para endpoints del usuario
  * */
+@CrossOrigin(origins = ["http://localhost:3000"])
 @RestController
 @RequestMapping("/users")
 class UserController {
