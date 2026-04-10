@@ -8,6 +8,9 @@ import org.springframework.data.repository.CrudRepository
 
 interface UserRepository : CrudRepository<UserEntity, Long> {
 
+    @Query("select u from UserEntity u where u.email = :email or u.username = :username")
+    fun findByEmailOrUsername(email: String, username: String): UserEntity?
+
     @Query("select u from UserEntity u where u.token = :token")
     fun findByToken(token: String): UserEntity?
 
@@ -18,5 +21,4 @@ interface UserRepository : CrudRepository<UserEntity, Long> {
     @Transactional
     @Query("update UserEntity u set u.token = :token where u.id = :id")
     fun updateTokenById(id: Long, token: String?)
-
 }
