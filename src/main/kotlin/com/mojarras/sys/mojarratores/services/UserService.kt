@@ -27,7 +27,7 @@ class UserService {
         if (existingUser != null) {
             return null
         }
-        user.password = hashPassword(user.password)
+        user.password = hashPassword(user.password?: "")
 
         val userEntity = user.toUserEntity()
         userRepository.save(userEntity)
@@ -110,10 +110,10 @@ class UserService {
         return user
     }
 
-    fun hashPassword(password: String?): String {
+    fun hashPassword(password: String): String {
         val bytes = MessageDigest
             .getInstance("SHA-256")
-            .digest(password?.toByteArray())
+            .digest(password.toByteArray())
         return bytes.joinToString("") { "%02x".format(it) }
     }
 

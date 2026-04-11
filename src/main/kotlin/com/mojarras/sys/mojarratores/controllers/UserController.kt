@@ -51,6 +51,11 @@ class UserController {
         @RequestBody createUserRequest: CreateUserRequest
     ): ResponseEntity<Any> {
 
+
+        if (createUserRequest.password.isBlank()) {
+            return ResponseEntity.status(400)
+                .body(mapOf("error" to "Password cannot be empty"))
+        }
         val newUser = createUserRequest.toUser()
 
         val addedUser = userService.addNewUser(newUser)
