@@ -119,7 +119,13 @@ class UserController {
     fun updateUser(
         @RequestHeader("Authorization") token: String,
         @RequestBody updateUserRequest: UpdateUserRequest
-    ): ResponseEntity<User>{
+    ): ResponseEntity<Any>{
+
+        if (updateUserRequest.password != null && updateUserRequest.password.isBlank()) {
+            return ResponseEntity.status(400)
+                .body(mapOf("error" to "Password cannot be empty"))
+        }
+
         val updatedUser = userService.updateUser(token, updateUserRequest)
             ?: return ResponseEntity.status(409).build()
 
