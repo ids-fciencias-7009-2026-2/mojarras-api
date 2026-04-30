@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.controllers
+package com.mojarras.sys.mojarratores.user.controllers
 
 import com.mojarras.sys.mojarratores.dto.response.LogoutResponse
 import com.mojarras.sys.mojarratores.domain.User

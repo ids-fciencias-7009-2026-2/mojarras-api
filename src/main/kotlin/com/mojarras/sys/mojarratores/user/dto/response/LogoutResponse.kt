@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.dto.response
+package com.mojarras.sys.mojarratores.user.dto.response
 
 data class LogoutResponse (
     val userId: String,

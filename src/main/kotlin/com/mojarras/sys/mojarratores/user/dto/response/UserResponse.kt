@@ -1,8 +1,8 @@
-package com.mojarras.sys.mojarratores.dto.request
+package com.mojarras.sys.mojarratores.user.dto.response
 
-data class CreateUserRequest(
+data class UserResponse(
+    val id: Long,
     val email: String,
-    val password: String,
     val username: String,
     val firstName: String,
     val lastName: String,

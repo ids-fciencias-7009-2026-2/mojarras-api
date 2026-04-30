@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.repositories
+package com.mojarras.sys.mojarratores.user.repositories
 
 import com.mojarras.sys.mojarratores.entities.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository

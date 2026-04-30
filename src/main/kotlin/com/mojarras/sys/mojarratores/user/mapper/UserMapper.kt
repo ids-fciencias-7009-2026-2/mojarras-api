@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.mapper
+package com.mojarras.sys.mojarratores.user.mapper
 
 import com.mojarras.sys.mojarratores.domain.User
 import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest

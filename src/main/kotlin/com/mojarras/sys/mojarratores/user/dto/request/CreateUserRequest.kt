@@ -1,7 +1,6 @@
-package com.mojarras.sys.mojarratores.domain
+package com.mojarras.sys.mojarratores.user.dto.request
 
-data class User(
-    val id: Long? = null,
+data class CreateUserRequest(
     val email: String,
     val password: String,
     val username: String,

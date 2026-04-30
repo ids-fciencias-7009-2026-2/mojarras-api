@@ -1,4 +1,4 @@
-    package com.mojarras.sys.mojarratores.services
+package com.mojarras.sys.mojarratores.user.services
 
     import com.mojarras.sys.mojarratores.domain.User
     import com.mojarras.sys.mojarratores.domain.toUser
