@@ -1,56 +1,75 @@
 package com.mojarras.sys.mojarratores.user.services
 
+import com.mojarras.sys.mojarratores.exception.BadRequestException
+import com.mojarras.sys.mojarratores.exception.ConflictException
+import com.mojarras.sys.mojarratores.exception.NotFoundException
+import com.mojarras.sys.mojarratores.exception.UnauthorizedException
+import com.mojarras.sys.mojarratores.security.JwtUtil
 import com.mojarras.sys.mojarratores.user.domain.User
-import com.mojarras.sys.mojarratores.user.domain.toUser
-import com.mojarras.sys.mojarratores.user.entities.UserEntity
 import com.mojarras.sys.mojarratores.user.dto.request.UpdateUserRequest
-import com.mojarras.sys.mojarratores.user.mapper.toEntity
+import com.mojarras.sys.mojarratores.user.dto.response.AuthResponse
+import com.mojarras.sys.mojarratores.user.mapper.toUser
+import com.mojarras.sys.mojarratores.user.mapper.toUserEntity
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
-import com.mojarras.sys.mojarratores.user.repositories.toUserEntity
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class UserService {
+class UserService (
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val jwtUtil: JwtUtil
+) {
 
-    val logger = LoggerFactory.getLogger(UserService::class.java)
+    private val logger = LoggerFactory.getLogger(UserService::class.java)
 
-    @Autowired
-    lateinit var userRepository: UserRepository
+    fun addNewUser(user: User): User {
 
-
-    fun addNewUser(user: User): User? {
-        val existingUser = userRepository.findByEmailOrUsername(user.email, user.username)
-        if (existingUser != null) {
-            return null
+        if (userRepository.existsByEmail(user.email)) {
+            throw ConflictException("Email already in use")
         }
-        user.password = hashPassword(user.password?: "")
 
-        val userEntity = user.toUserEntity()
-        userRepository.save(userEntity)
-        val savedUser = userEntity.toUser()
-        savedUser.password = "****"
-        return savedUser
+        if (userRepository.existsByUsername(user.username)) {
+            throw ConflictException("Username already in use")
+        }
+
+        val encodedPassword = requireNotNull(passwordEncoder.encode(user.password)) {
+            "Password encoding failed"
+        }
+        val userEntity = user.toUserEntity(encodedPassword)
+        val savedUser = userRepository.save(userEntity)
+
+        logger.info("User added: ${savedUser.email}")
+
+        return savedUser.toUser()
     }
 
-    fun login (email: String, password: String): User ?{
-        val hashedPassword = hashPassword(password)
-        val userEntity = userRepository.findUserByPasswordAndEmail(email, hashedPassword)
-            ?: return null
+    fun login (email: String, password: String): AuthResponse {
 
-        val token = UUID.randomUUID().toString()
-        userRepository.updateTokenById(userEntity.id!!, token)
+        val entity = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
 
-        val user = userEntity.toUser()
-        user.password = "****"
-        user.token = token
-        return user
+
+        if (!passwordEncoder.matches(password, entity.passwordHash)) {
+            throw UnauthorizedException("Invalid credentials")
+        }
+
+        val token = jwtUtil.generateToken(entity.email)
+
+        logger.info("Login success: ${entity.email}")
+
+        return AuthResponse(
+            token,
+            Instant.now().plusSeconds(jwtUtil.expiration).toString()
+        )
     }
 
+    /*
     fun logout(token: String): Boolean{
         val userEntity = userRepository.findByToken(token)
             ?: return false
@@ -58,64 +77,33 @@ class UserService {
         userRepository.updateTokenById(userEntity.id!!, null)
         return true
     }
+     */
 
-    fun getMe(token: String): User?{
-        val userEntity = userRepository.findByToken(token)
-            ?: return null
-
-        val user = userEntity.toUser()
-        user.password = "****"
-        return user
+    fun getMe(email: String): User{
+        return userRepository.findByEmail(email)
+            ?.toUser()
+            ?: throw NotFoundException("User not found")
     }
 
-    fun updateUser(token: String, request: UpdateUserRequest): User? {
+    fun updateUser(email: String, request: UpdateUserRequest): User {
 
-        val userEntity = userRepository.findByToken(token) ?: return null
+        val userEntity = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
 
-        if (!request.email.isNullOrBlank()) {
+        request.username?.let { userEntity.username = it }
+        request.firstName?.let { userEntity.firstName = it }
+        request.lastName?.let { userEntity.lastName = it }
+        request.zipCode?.let { userEntity.zipCode = it }
 
-            val existingUser = userRepository.findByEmail(request.email)
-
-            if (existingUser != null && existingUser.id != userEntity.id) {
-                return null
+        request.password?.let {
+            if (it.length < 6) throw BadRequestException("Password too short")
+            userEntity.passwordHash = requireNotNull(passwordEncoder.encode(it)) {
+                "Password encoding failed"
             }
-
-            userEntity.email = request.email
-        }
-
-        if (!request.password.isNullOrBlank()) {
-            userEntity.password = hashPassword(request.password!!)
-        }
-
-        if (!request.username.isNullOrBlank()) {
-            userEntity.username = request.username
-        }
-
-        if (!request.firstName.isNullOrBlank()) {
-            userEntity.firstName = request.firstName
-        }
-
-        if (!request.lastName.isNullOrBlank()) {
-            userEntity.lastName = request.lastName
-        }
-
-        if (!request.zipCode.isNullOrBlank()) {
-            userEntity.zipCode = request.zipCode
         }
 
         userEntity.updatedAt = LocalDateTime.now()
-        userRepository.save(userEntity)
 
-        val user = userEntity.toUser()
-        user.password = "****"
-        return user
+        return userRepository.save(userEntity).toUser()
     }
-
-    fun hashPassword(password: String): String {
-        val bytes = MessageDigest
-            .getInstance("SHA-256")
-            .digest(password.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
-
 }

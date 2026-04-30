@@ -6,7 +6,7 @@ import com.mojarras.sys.mojarratores.user.dto.response.UserResponse
 import com.mojarras.sys.mojarratores.user.entities.UserEntity
 
 // DTO → Domain
-fun CreateUserRequest.toDomain() = User(
+fun CreateUserRequest.toUser() = User(
     email = email,
     password = password,
     username = username,
@@ -16,7 +16,7 @@ fun CreateUserRequest.toDomain() = User(
 )
 
 // Domain → Entity
-fun User.toEntity(passwordHash: String) = UserEntity(
+fun User.toUserEntity(passwordHash: String) = UserEntity(
     email = email,
     passwordHash = passwordHash,
     username = username,
@@ -26,7 +26,7 @@ fun User.toEntity(passwordHash: String) = UserEntity(
 )
 
 // Entity → Domain
-fun UserEntity.toDomain() = User(
+fun UserEntity.toUser() = User(
     id = id,
     email = email,
     password = passwordHash,
@@ -37,7 +37,7 @@ fun UserEntity.toDomain() = User(
 )
 
 // Domain → Response
-fun User.toResponse() = UserResponse(
+fun User.toUserResponse() = UserResponse(
     id = id ?: 0L,
     email = email,
     username = username,

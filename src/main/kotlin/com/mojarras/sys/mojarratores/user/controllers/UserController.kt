@@ -2,15 +2,21 @@ package com.mojarras.sys.mojarratores.user.controllers
 
 import com.mojarras.sys.mojarratores.user.dto.response.LogoutResponse
 import com.mojarras.sys.mojarratores.user.domain.User
-import com.mojarras.sys.mojarratores.user.domain.toUser
 import com.mojarras.sys.mojarratores.user.dto.request.CreateUserRequest
 import com.mojarras.sys.mojarratores.user.dto.request.UpdateUserRequest
 import com.mojarras.sys.mojarratores.user.dto.request.LoginRequest
+import com.mojarras.sys.mojarratores.user.dto.response.AuthResponse
+import com.mojarras.sys.mojarratores.user.dto.response.UserResponse
+import com.mojarras.sys.mojarratores.user.mapper.toUser
+import com.mojarras.sys.mojarratores.user.mapper.toUserResponse
 import com.mojarras.sys.mojarratores.user.services.UserService
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -20,55 +26,40 @@ import java.time.LocalDateTime
 @CrossOrigin(origins = ["http://localhost:3000"])
 @RestController
 @RequestMapping("/users")
-class UserController {
+class UserController (
+    private val userService: UserService
+) {
 
-    @Autowired
-    lateinit var userService: UserService
-
-    val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
     /**
      * Endpoint para consultar el usuario autenticado
      * */
     @GetMapping("/me")
     fun retrieveUser(
-        @RequestHeader("Authorization") token: String
-    ): ResponseEntity<User> {
+        authentication: Authentication
+    ): ResponseEntity<UserResponse> {
 
-        val user = userService.getMe(token)
-            ?: return ResponseEntity.status(401).build()
+        val user = userService.getMe(authentication.name)
 
-        logger.info("User found in database: $user")
-        return ResponseEntity.ok(user)
+        return ResponseEntity.ok(user.toUserResponse())
     }
-
 
     /**
      * Endpoint para registrar un usuario
      * */
     @PostMapping("/register")
     fun register(
-        @RequestBody createUserRequest: CreateUserRequest
-    ): ResponseEntity<Any> {
+        @Valid @RequestBody createUserRequest: CreateUserRequest
+    ): ResponseEntity<UserResponse> {
 
-
-        if (createUserRequest.password.isBlank()) {
-            return ResponseEntity.status(400)
-                .body(mapOf("error" to "Password cannot be empty"))
-        }
         val newUser = createUserRequest.toUser()
 
         val addedUser = userService.addNewUser(newUser)
-            ?: return ResponseEntity.status(409)
-                    .body(
-                            mapOf(
-                                    "error" to
-                                            "User with that email or username already exists"
-                            )
-                    )
 
         logger.info("User added: $addedUser")
-        return ResponseEntity.ok(addedUser)
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(addedUser.toUserResponse())
     }
 
     /**
@@ -76,19 +67,14 @@ class UserController {
      * */
     @PostMapping("/login")
     fun login(
-        @RequestBody loginRequest: LoginRequest
-    ): ResponseEntity<User> {
+        @Valid @RequestBody loginRequest: LoginRequest
+    ): ResponseEntity<AuthResponse> {
 
-        val user = userService.login(loginRequest.email, loginRequest.password)
-            ?: run{
-                logger.error("Login failed for: $loginRequest ")
-                return ResponseEntity.status(401).build()
-            }
-        logger.info("Login sccessful for: $loginRequest")
-        return ResponseEntity.ok(user)
+        val authResponse = userService.login(loginRequest.email, loginRequest.password)
+        return ResponseEntity.ok(authResponse)
     }
 
-
+    /*
     /**
      * Endpoint que simula cerrar sesion del usuario
      * */
@@ -111,27 +97,21 @@ class UserController {
         )
         return ResponseEntity.ok(response)
     }
+     */
 
     /**
      *  Endpoint que simula la actualización de  un usuario
      * */
     @PutMapping
     fun updateUser(
-        @RequestHeader("Authorization") token: String,
-        @RequestBody updateUserRequest: UpdateUserRequest
-    ): ResponseEntity<Any>{
+        authentication: Authentication,
+        @Valid @RequestBody updateUserRequest: UpdateUserRequest
+    ): ResponseEntity<UserResponse>{
 
-        if (updateUserRequest.password != null && updateUserRequest.password.isBlank()) {
-            return ResponseEntity.status(400)
-                .body(mapOf("error" to "Password cannot be empty"))
-        }
+        val updatedUser = userService.updateUser(authentication.name, updateUserRequest)
 
-        val updatedUser = userService.updateUser(token, updateUserRequest)
-            ?: return ResponseEntity.status(409).build()
+        logger.info("User updated: ${updatedUser.email}")
 
-        logger.info("Info to update: $updateUserRequest")
-
-        return ResponseEntity.ok(updatedUser)
+        return ResponseEntity.ok(updatedUser.toUserResponse())
     }
-
 }
