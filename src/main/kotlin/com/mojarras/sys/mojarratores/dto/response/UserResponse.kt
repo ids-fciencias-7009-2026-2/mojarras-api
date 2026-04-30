@@ -1,9 +1,8 @@
-package com.mojarras.sys.mojarratores.domain
+package com.mojarras.sys.mojarratores.dto.response
 
-data class User(
-    val id: Long? = null,
+data class UserResponse(
+    val id: Long,
     val email: String,
-    val password: String,
     val username: String,
     val firstName: String,
     val lastName: String,

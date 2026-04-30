@@ -11,27 +11,27 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "users")
 data class UserEntity(
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    var email: String = "",
+    @Column(unique = true, nullable = false)
+    var username: String,
 
-    var password: String? = null,
+    @Column(name = "first_name", nullable = false)
+    var firstName: String,
 
-    var username: String = "",
+    @Column(name = "last_name", nullable = false)
+    var lastName: String,
 
-    @Column(name = "first_name")
-    var firstName: String = "",
+    @Column(unique = true, nullable = false)
+    var email: String,
 
-    @Column(name = "last_name")
-    var lastName: String = "",
+    @Column(name = "password", nullable = false)
+    var passwordHash: String,
 
-    @Column(name = "zip_code")
-    var zipCode: String? = null,
-
-    var token: String? = null,
+    @Column(name = "zip_code", nullable = false)
+    var zipCode: String,
 
     @Column(name = "created_at")
     var createdAt: LocalDateTime = LocalDateTime.now(),
