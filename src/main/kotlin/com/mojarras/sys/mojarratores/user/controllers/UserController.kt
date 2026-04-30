@@ -1,12 +1,12 @@
 package com.mojarras.sys.mojarratores.user.controllers
 
-import com.mojarras.sys.mojarratores.dto.response.LogoutResponse
-import com.mojarras.sys.mojarratores.domain.User
-import com.mojarras.sys.mojarratores.domain.toUser
-import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest
-import com.mojarras.sys.mojarratores.dto.request.UpdateUserRequest
-import com.mojarras.sys.mojarratores.dto.request.LoginRequest
-import com.mojarras.sys.mojarratores.services.UserService
+import com.mojarras.sys.mojarratores.user.dto.response.LogoutResponse
+import com.mojarras.sys.mojarratores.user.domain.User
+import com.mojarras.sys.mojarratores.user.domain.toUser
+import com.mojarras.sys.mojarratores.user.dto.request.CreateUserRequest
+import com.mojarras.sys.mojarratores.user.dto.request.UpdateUserRequest
+import com.mojarras.sys.mojarratores.user.dto.request.LoginRequest
+import com.mojarras.sys.mojarratores.user.services.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

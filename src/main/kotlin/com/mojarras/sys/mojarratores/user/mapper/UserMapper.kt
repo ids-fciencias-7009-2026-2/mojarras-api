@@ -1,9 +1,9 @@
 package com.mojarras.sys.mojarratores.user.mapper
 
-import com.mojarras.sys.mojarratores.domain.User
-import com.mojarras.sys.mojarratores.dto.request.CreateUserRequest
-import com.mojarras.sys.mojarratores.dto.response.UserResponse
-import com.mojarras.sys.mojarratores.entities.UserEntity
+import com.mojarras.sys.mojarratores.user.domain.User
+import com.mojarras.sys.mojarratores.user.dto.request.CreateUserRequest
+import com.mojarras.sys.mojarratores.user.dto.response.UserResponse
+import com.mojarras.sys.mojarratores.user.entities.UserEntity
 
 // DTO → Domain
 fun CreateUserRequest.toDomain() = User(
