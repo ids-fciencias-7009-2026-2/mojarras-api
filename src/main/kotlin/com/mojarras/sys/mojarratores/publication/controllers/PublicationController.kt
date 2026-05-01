@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.publication.controller
+package com.mojarras.sys.mojarratores.publication.controllers
 
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
