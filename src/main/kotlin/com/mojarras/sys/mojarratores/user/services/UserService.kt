@@ -14,10 +14,8 @@ import com.mojarras.sys.mojarratores.user.repositories.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.security.MessageDigest
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Service
 class UserService (
