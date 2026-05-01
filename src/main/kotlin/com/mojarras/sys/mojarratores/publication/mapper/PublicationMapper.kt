@@ -6,7 +6,7 @@ import com.mojarras.sys.mojarratores.publication.dto.response.PublicationRespons
 import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
 
 // Request → Domain
-fun CreatePublicationRequest.toDomain(ownerId: Long) = Publication(
+fun CreatePublicationRequest.toPublication(ownerId: Long) = Publication(
     ownerId = ownerId,
     petName = petName,
     description = description,
@@ -16,7 +16,7 @@ fun CreatePublicationRequest.toDomain(ownerId: Long) = Publication(
 )
 
 // Domain → Entity
-fun Publication.toEntity() = PublicationEntity(
+fun Publication.toPublicationEntity() = PublicationEntity(
     ownerId = ownerId,
     petName = petName,
     description = description,
@@ -26,7 +26,7 @@ fun Publication.toEntity() = PublicationEntity(
 )
 
 // Entity → Domain
-fun PublicationEntity.toDomain() = Publication(
+fun PublicationEntity.toPublication() = Publication(
     id = id,
     ownerId = ownerId,
     petName = petName,
@@ -39,7 +39,7 @@ fun PublicationEntity.toDomain() = Publication(
 )
 
 // Domain → Response
-fun Publication.toResponse() = PublicationResponse(
+fun Publication.toPublicationResponse() = PublicationResponse(
     id = id ?: 0,
     petName = petName,
     description = description,
