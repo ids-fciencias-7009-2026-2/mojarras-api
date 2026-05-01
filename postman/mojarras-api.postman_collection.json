@@ -1,28 +1,14 @@
 {
   "info": {
+    "_postman_id": "641580da-bcd7-4c2d-b924-9cdf31028ce2",
     "name": "User API - Mojarras",
-    "_postman_id": "12345678-abcd-efgh-ijkl-987654321000",
-    "description": "Colección de endpoints para UserController en localhost, con flujo secuencial y captura automática de email y token",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "description": "Flujo completo con JWT Bearer",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43312256"
   },
   "item": [
     {
-      "name": "Register User (POST /users/register)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"user{{$timestamp}}@example.com\",\n  \"password\": \"123456\",\n  \"username\": \"user{{$timestamp}}\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"zipCode\": \"12345\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/users/register",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "register"]
-        }
-      },
+      "name": "Register User",
       "event": [
         {
           "listen": "test",
@@ -32,28 +18,38 @@
               "if(jsonData && jsonData.email){",
               "   pm.collectionVariables.set(\"userEmail\", jsonData.email);",
               "}"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
-      ]
-    },
-    {
-      "name": "Login (POST /users/login)",
+      ],
       "request": {
         "method": "POST",
         "header": [
-          { "key": "Content-Type", "value": "application/json" }
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
+          "raw": "{\n  \"email\": \"user{{$timestamp}}@example.com\",\n  \"password\": \"123456\",\n  \"username\": \"user{{$timestamp}}\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"zipCode\": \"12345\"\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/users/login",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "login"]
+          "raw": "{{baseUrl}}/users/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "register"
+          ]
         }
       },
+      "response": []
+    },
+    {
+      "name": "Login",
       "event": [
         {
           "listen": "test",
@@ -63,32 +59,72 @@
               "if(jsonData && jsonData.token){",
               "   pm.collectionVariables.set(\"token\", jsonData.token);",
               "}"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
-      ]
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
     },
     {
-      "name": "Retrieve User (GET /users/me)",
+      "name": "Get Me",
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Authorization", "value": "{{token}}" }
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
         ],
         "url": {
           "raw": "{{baseUrl}}/users/me",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "me"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "me"
+          ]
         }
-      }
+      },
+      "response": []
     },
     {
-      "name": "Update User (PUT /users)",
+      "name": "Update User",
       "request": {
         "method": "PUT",
         "header": [
-          { "key": "Authorization", "value": "{{token}}" },
-          { "key": "Content-Type", "value": "application/json" }
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
         "body": {
           "mode": "raw",
@@ -96,29 +132,29 @@
         },
         "url": {
           "raw": "{{baseUrl}}/users",
-          "host": ["{{baseUrl}}"],
-          "path": ["users"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
         }
-      }
-    },
-    {
-      "name": "Logout (POST /users/logout)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Authorization", "value": "{{token}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/logout",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "logout"]
-        }
-      }
+      },
+      "response": []
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "token", "value": "" },
-    { "key": "userEmail", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "userEmail",
+      "value": ""
+    }
   ]
 }
