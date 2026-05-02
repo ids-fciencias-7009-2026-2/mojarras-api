@@ -7,4 +7,6 @@ interface PhotoRepository : JpaRepository<PhotoEntity, Long> {
 
     fun findAllByPublicationId(publicationId: Long): List<PhotoEntity>
 
+    fun findTopByPublicationIdOrderByIdAsc(publicationId: Long): PhotoEntity?
+
 }

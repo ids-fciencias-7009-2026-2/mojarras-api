@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.publication.entities
 
+import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -27,6 +28,10 @@ data class PublicationEntity(
 
     @Column(name = "zip_code", nullable = false)
     val zipCode: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val status: PublicationStatus = PublicationStatus.DRAFT,
 
     @Column(name = "created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),

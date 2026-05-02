@@ -2,8 +2,12 @@ package com.mojarras.sys.mojarratores.publication.controllers
 
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
+import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithOnePhotoResponse
+import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithPhotosResponse
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationResponse
+import com.mojarras.sys.mojarratores.publication.mapper.toPublicationWithOnePhotoResponse
+import com.mojarras.sys.mojarratores.publication.mapper.toPublicationWithPhotosResponse
 import com.mojarras.sys.mojarratores.publication.services.PublicationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
@@ -20,7 +24,7 @@ class PublicationController(
 
     private val logger = LoggerFactory.getLogger(PublicationController::class.java)
 
-    @PostMapping("/create")
+    @PostMapping()
     fun create(
         @Valid @RequestBody request: CreatePublicationRequest,
         authentication: Authentication
@@ -37,19 +41,25 @@ class PublicationController(
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: Long): ResponseEntity<PublicationResponse> {
+    fun getById(@PathVariable id: Long): ResponseEntity<PublicationWithPhotosResponse> {
 
-        val publication = publicationService.getById(id)
+        val (publication, photos) = publicationService.getById(id)
 
-        return ResponseEntity.ok(publication.toPublicationResponse())
+        return ResponseEntity.ok(
+            publication.toPublicationWithPhotosResponse(photos)
+        )
     }
 
     @GetMapping
-    fun getAll(): ResponseEntity<List<PublicationResponse>> {
+    fun getAll(): ResponseEntity<List<PublicationWithOnePhotoResponse>> {
 
         val list = publicationService.getAll()
-            .map { it.toPublicationResponse() }
 
-        return ResponseEntity.ok(list)
+        val response = list.map { (publication, thumbnail) ->
+            publication.toPublicationWithOnePhotoResponse(thumbnail)
+
+        }
+
+        return ResponseEntity.ok(response)
     }
 }

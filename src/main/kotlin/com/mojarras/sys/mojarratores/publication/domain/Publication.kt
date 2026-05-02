@@ -10,6 +10,12 @@ data class Publication(
     val type: String,
     val breed: String?,
     val zipCode: String,
+    val status: PublicationStatus = PublicationStatus.DRAFT,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 )
+
+enum class PublicationStatus {
+    DRAFT,
+    ACTIVE
+}

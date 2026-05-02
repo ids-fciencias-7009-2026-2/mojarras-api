@@ -3,6 +3,7 @@ package com.mojarras.sys.mojarratores.photo.controller
 import com.mojarras.sys.mojarratores.photo.services.PhotoService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,10 +20,15 @@ class PhotoController(
     @PostMapping
     fun upload(
         @PathVariable id: Long,
-        @RequestParam("files") files: List<MultipartFile>
+        @RequestParam("files") files: List<MultipartFile>,
+        authentication: Authentication
     ): ResponseEntity<List<String>> {
 
-        val photos = photoService.uploadPhotos(id, files)
+        val photos = photoService.uploadPhotos(
+            id,
+            authentication.name,
+            files
+        )
 
         val urls = photos.map { it.url }
 
