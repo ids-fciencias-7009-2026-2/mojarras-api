@@ -12,7 +12,7 @@ class EmailService(
 
     private val logger = LoggerFactory.getLogger(EmailService::class.java)
 
-    fun sendInterestEmail(
+    fun sendInterestNotification(
         ownerEmail: String,
         ownerName: String,
         interestedName: String,
