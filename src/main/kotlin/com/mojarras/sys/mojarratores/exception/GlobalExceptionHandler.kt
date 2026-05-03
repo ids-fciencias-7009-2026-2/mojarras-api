@@ -11,7 +11,6 @@ import tools.jackson.databind.exc.InvalidFormatException
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
-    // Método auxiliar para unificar el formato de respuesta
     private fun buildResponse(status: HttpStatus, message: String): ResponseEntity<Map<String, Any>> {
         return ResponseEntity.status(status).body(
             mapOf(

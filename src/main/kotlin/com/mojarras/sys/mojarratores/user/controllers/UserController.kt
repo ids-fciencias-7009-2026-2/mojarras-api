@@ -14,9 +14,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
-/**
- * Controlador para endpoints del usuario
- * */
 @CrossOrigin(origins = ["http://localhost:3000"])
 @RestController
 @RequestMapping("/users")
@@ -24,9 +21,6 @@ class UserController (
     private val userService: UserService
 ) {
 
-    /**
-     * Endpoint para consultar el usuario autenticado
-     * */
     @GetMapping("/me")
     fun retrieveUser(
         authentication: Authentication
@@ -37,10 +31,7 @@ class UserController (
         return ResponseEntity.ok(user.toUserResponse())
     }
 
-    /**
-     * Endpoint para registrar un usuario
-     * */
-    @PostMapping("/register")
+    @PostMapping()
     fun register(
         @Valid @RequestBody createUserRequest: CreateUserRequest
     ): ResponseEntity<UserResponse> {
@@ -53,9 +44,6 @@ class UserController (
             .body(addedUser.toUserResponse())
     }
 
-    /**
-     * Endpoint para iniciar sesión
-     * */
     @PostMapping("/login")
     fun login(
         @Valid @RequestBody loginRequest: LoginRequest
@@ -90,9 +78,6 @@ class UserController (
     }
      */
 
-    /**
-     *  Endpoint que simula la actualización de  un usuario
-     * */
     @PutMapping
     fun updateUser(
         authentication: Authentication,
