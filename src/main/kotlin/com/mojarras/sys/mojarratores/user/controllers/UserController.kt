@@ -9,8 +9,6 @@ import com.mojarras.sys.mojarratores.user.mapper.toUser
 import com.mojarras.sys.mojarratores.user.mapper.toUserResponse
 import com.mojarras.sys.mojarratores.user.services.UserService
 import jakarta.validation.Valid
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.*
 class UserController (
     private val userService: UserService
 ) {
-
-    private val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
     /**
      * Endpoint para consultar el usuario autenticado
@@ -53,7 +49,6 @@ class UserController (
 
         val addedUser = userService.addNewUser(newUser)
 
-        logger.info("User added: $addedUser")
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(addedUser.toUserResponse())
     }
@@ -105,8 +100,6 @@ class UserController (
     ): ResponseEntity<UserResponse>{
 
         val updatedUser = userService.updateUser(authentication.name, updateUserRequest)
-
-        logger.info("User updated: ${updatedUser.email}")
 
         return ResponseEntity.ok(updatedUser.toUserResponse())
     }

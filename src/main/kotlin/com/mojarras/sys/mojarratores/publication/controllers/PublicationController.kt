@@ -12,7 +12,6 @@ import com.mojarras.sys.mojarratores.publication.mapper.toPublicationWithPhotosR
 import com.mojarras.sys.mojarratores.publication.services.PublicationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -25,8 +24,6 @@ class PublicationController(
     private val publicationService: PublicationService
 ) {
 
-    private val logger = LoggerFactory.getLogger(PublicationController::class.java)
-
     @PostMapping()
     fun create(
         @Valid @RequestBody request: CreatePublicationRequest,
@@ -36,8 +33,6 @@ class PublicationController(
         val publication = request.toPublication(0) // owner se asigna en service
 
         val created = publicationService.create(publication, authentication.name)
-
-        logger.info("Publication created: ${created.id}")
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(created.toPublicationResponse())

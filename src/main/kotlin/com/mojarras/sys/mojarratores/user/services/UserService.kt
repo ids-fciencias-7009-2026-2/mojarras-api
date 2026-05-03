@@ -102,6 +102,10 @@ class UserService (
 
         userEntity.updatedAt = LocalDateTime.now()
 
-        return userRepository.save(userEntity).toUser()
+        val updatedUser =  userRepository.save(userEntity).toUser()
+
+        logger.info("User updated: ${updatedUser.email}")
+
+        return updatedUser
     }
 }
