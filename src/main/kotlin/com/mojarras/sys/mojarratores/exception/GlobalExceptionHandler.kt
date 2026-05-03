@@ -39,7 +39,6 @@ class GlobalExceptionHandler {
     fun handleUnauthorized(ex: UnauthorizedException) =
         buildResponse(HttpStatus.UNAUTHORIZED, ex.message.orEmpty())
 
-    // Errores de validación (el cuerpo del JSON)
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Any>> {
         val errors = ex.bindingResult.fieldErrors

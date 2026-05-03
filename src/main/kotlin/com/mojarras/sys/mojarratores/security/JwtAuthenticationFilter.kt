@@ -1,5 +1,8 @@
 package com.mojarras.sys.mojarratores.security
 
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.security.SignatureException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -46,8 +49,18 @@ class JwtAuthenticationFilter(
                     }
                 }
 
+            } catch (ex: ExpiredJwtException) {
+                logger.warn("JWT Expirado: ${ex.message}")
+                request.setAttribute("jwt_error", "El token ha expirado.")
+            } catch (ex: SignatureException) {
+                logger.error("Firma de JWT inválida: ${ex.message}")
+                request.setAttribute("jwt_error", "La firma del token es inválida.")
+            } catch (ex: MalformedJwtException) {
+                logger.warn("JWT Mal formado: ${ex.message}")
+                request.setAttribute("jwt_error", "El formato del token no es válido.")
             } catch (ex: Exception) {
-                logger.warn("JWT inválido: ${ex.message}")
+                logger.error("Error no controlado en JWT: ${ex.message}")
+                request.setAttribute("jwt_error", "Error de autenticación.")
             }
         }
 

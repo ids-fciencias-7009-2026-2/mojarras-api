@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.config
 
+import com.mojarras.sys.mojarratores.security.JwtAuthenticationEntryPoint
 import com.mojarras.sys.mojarratores.security.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,7 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val jwtFilter: JwtAuthenticationFilter
+    private val jwtFilter: JwtAuthenticationFilter,
+    private val jwtEntryPoint: JwtAuthenticationEntryPoint
 ) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -22,6 +24,9 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
+            .exceptionHandling {
+                it.authenticationEntryPoint(jwtEntryPoint)
             }
             .authorizeHttpRequests {
                 it.requestMatchers("/users/login", "/users/register").permitAll()
