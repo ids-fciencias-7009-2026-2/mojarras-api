@@ -7,13 +7,18 @@ data class Publication(
     val ownerId: Long,
     val petName: String,
     val description: String,
-    val type: String,
+    val type: PetType,
     val breed: String?,
     val zipCode: String,
     val status: PublicationStatus = PublicationStatus.DRAFT,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 )
+
+enum class PetType {
+    DOG,
+    CAT
+}
 
 enum class PublicationStatus {
     DRAFT,

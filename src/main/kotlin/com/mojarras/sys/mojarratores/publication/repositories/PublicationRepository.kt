@@ -1,13 +1,7 @@
 package com.mojarras.sys.mojarratores.publication.repositories
 
-import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 
-interface PublicationRepository : JpaRepository<PublicationEntity, Long> {
-
-    fun findAllByOwnerId(ownerId: Long): List<PublicationEntity>
-
-    fun findAllByStatus(status: PublicationStatus): List<PublicationEntity>
-
-}
+interface PublicationRepository : JpaRepository<PublicationEntity, Long>, JpaSpecificationExecutor<PublicationEntity>

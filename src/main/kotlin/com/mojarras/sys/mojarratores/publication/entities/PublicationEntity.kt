@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.publication.entities
 
+import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -21,8 +22,9 @@ data class PublicationEntity(
     @Column(nullable = false, length = 1000)
     val description: String,
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val type: String,
+    val type: PetType,
 
     val breed: String?,
 

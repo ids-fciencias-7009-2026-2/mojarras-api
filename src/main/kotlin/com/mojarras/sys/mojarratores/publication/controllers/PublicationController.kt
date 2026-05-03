@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.publication.controllers
 
+import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithOnePhotoResponse
@@ -12,6 +13,8 @@ import com.mojarras.sys.mojarratores.publication.services.PublicationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
@@ -51,15 +54,20 @@ class PublicationController(
     }
 
     @GetMapping
-    fun getAll(): ResponseEntity<List<PublicationWithOnePhotoResponse>> {
+    fun getAll(
+        @RequestParam(required = false) type: PetType?,
+        @RequestParam(required = false) zipCode: String?,
+        @RequestParam(required = false) breed: String?,
+        pageable: Pageable
+    ): ResponseEntity<Page<PublicationWithOnePhotoResponse>> {
 
-        val list = publicationService.getAll()
+        val page = publicationService.getAll(type, zipCode, breed, pageable)
 
-        val response = list.map { (publication, thumbnail) ->
+        val response = page.map { (publication, thumbnail) ->
             publication.toPublicationWithOnePhotoResponse(thumbnail)
-
         }
 
         return ResponseEntity.ok(response)
     }
+
 }

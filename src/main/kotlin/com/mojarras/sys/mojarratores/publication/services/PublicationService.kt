@@ -3,15 +3,21 @@ package com.mojarras.sys.mojarratores.publication.services
 import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
+import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
+import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationEntity
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationRepository
+import com.mojarras.sys.mojarratores.publication.repositories.PublicationSpecification
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
 import org.springframework.stereotype.Service
 
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 
 @Service
 class PublicationService(
@@ -26,8 +32,6 @@ class PublicationService(
 
         val user = userRepository.findByEmail(email)
             ?: throw NotFoundException("User not found")
-
-        validate(publication)
 
         val publicationEntity = publication.copy(
             ownerId = user.id!!,
@@ -56,27 +60,36 @@ class PublicationService(
         return Pair(publication.toPublication(), photos)
     }
 
-    fun getAll(): List<Pair<Publication, String?>> {
+    fun getAll(
+        type: PetType?,
+        zipCode: String?,
+        breed: String?,
+        pageable: Pageable
+    ): Page<Pair<Publication, String?>> {
 
-        val publications = publicationRepository.findAllByStatus(PublicationStatus.ACTIVE)
+        var spec: Specification<PublicationEntity> =
+            PublicationSpecification.hasStatus(PublicationStatus.ACTIVE)
 
-        return publications.map { entity ->
+        PublicationSpecification.hasType(type)?.let {
+            spec = spec.and(it)
+        }
+
+        PublicationSpecification.hasZipCode(zipCode)?.let {
+            spec = spec.and(it)
+        }
+
+        PublicationSpecification.hasBreed(breed)?.let {
+            spec = spec.and(it)
+        }
+
+        val page = publicationRepository.findAll(spec, pageable)
+
+        return page.map { entity ->
 
             val photo = photoRepository
                 .findTopByPublicationIdOrderByIdAsc(entity.id!!)
 
             Pair(entity.toPublication(), photo?.url)
-        }
-    }
-
-    private fun validate(publication: Publication) {
-
-        if (publication.type !in listOf("DOG", "CAT")) {
-            throw BadRequestException("Type must be DOG or CAT")
-        }
-
-        if (publication.description.length < 10) {
-            throw BadRequestException("Description too short")
         }
     }
 }
