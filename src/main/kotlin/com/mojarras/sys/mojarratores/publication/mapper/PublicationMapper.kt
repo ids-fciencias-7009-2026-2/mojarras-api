@@ -3,6 +3,7 @@ package com.mojarras.sys.mojarratores.publication.mapper
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
+import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithOnePhotoResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithPhotosResponse
@@ -75,4 +76,13 @@ fun Publication.toPublicationWithOnePhotoResponse(photo: String?) =
         breed = breed,
         zipCode = zipCode,
         thumbnail = photo
+)
+
+// Request -> Domain
+fun UpdatePublicationRequest.applyTo(existing: Publication) = existing.copy(
+    petName = petName ?: existing.petName,
+    description = description ?: existing.description,
+    type = type ?: existing.type,
+    breed = breed ?: existing.breed,
+    zipCode = zipCode ?: existing.zipCode
 )

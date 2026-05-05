@@ -2,6 +2,7 @@ package com.mojarras.sys.mojarratores.publication.services
 
 import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
+import com.mojarras.sys.mojarratores.exception.UnauthorizedException
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
@@ -13,6 +14,7 @@ import com.mojarras.sys.mojarratores.publication.repositories.PublicationReposit
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationSpecification
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
 import org.springframework.stereotype.Service
+
 
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -91,5 +93,49 @@ class PublicationService(
 
             Pair(entity.toPublication(), photo?.url)
         }
+    }
+
+    fun update(id: Long, email: String, changes: Publication): Publication {
+
+        val existing = publicationRepository.findById(id)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (existing.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        val updated = existing.toPublication().copy(
+            petName     = changes.petName,
+            description = changes.description,
+            type        = changes.type,
+            breed       = changes.breed,
+            zipCode     = changes.zipCode
+        )
+
+        val saved = publicationRepository.save(updated.toPublicationEntity())
+
+        logger.info("Publication updated: $id by user ${user.email}")
+
+        return saved.toPublication()
+    }
+
+    fun delete(id: Long, email: String) {
+
+        val publication = publicationRepository.findById(id)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (publication.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        publicationRepository.deleteById(id)
+
+        logger.info("Publication deleted: $id by user ${user.email}")
     }
 }

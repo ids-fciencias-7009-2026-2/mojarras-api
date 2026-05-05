@@ -4,6 +4,7 @@ import com.mojarras.sys.mojarratores.photo.services.PhotoService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -33,5 +34,17 @@ class PhotoController(
         val urls = photos.map { it.url }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(urls)
+    }
+
+    @DeleteMapping("/{photoId}")
+    fun delete(
+        @PathVariable id: Long,
+        @PathVariable photoId: Long,
+        authentication: Authentication
+    ): ResponseEntity<Void> {
+
+        photoService.deletePhoto(photoId, id, authentication.name)
+
+        return ResponseEntity.noContent().build()
     }
 }

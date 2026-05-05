@@ -1,10 +1,13 @@
 package com.mojarras.sys.mojarratores.publication.controllers
 
 import com.mojarras.sys.mojarratores.publication.domain.PetType
+import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
+import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithOnePhotoResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithPhotosResponse
+import com.mojarras.sys.mojarratores.publication.mapper.applyTo
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationResponse
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationWithOnePhotoResponse
@@ -64,5 +67,33 @@ class PublicationController(
 
         return ResponseEntity.ok(response)
     }
+
+    @PatchMapping("/{id}")
+    fun update(
+        @PathVariable id: Long,
+        @Valid @RequestBody request: UpdatePublicationRequest,
+        authentication: Authentication
+    ): ResponseEntity<PublicationResponse> {
+
+        val changes = request.applyTo(
+            Publication(ownerId = 0, petName = "", description = "", type = PetType.DOG, breed = "", zipCode = "")
+        )
+
+        val updated = publicationService.update(id, authentication.name, changes)
+
+        return ResponseEntity.ok(updated.toPublicationResponse())
+    }
+
+    @DeleteMapping("/{id}")
+    fun delete(
+        @PathVariable id: Long,
+        authentication: Authentication
+    ): ResponseEntity<Void> {
+
+        publicationService.delete(id, authentication.name)
+
+        return ResponseEntity.noContent().build()
+    }
+
 
 }
