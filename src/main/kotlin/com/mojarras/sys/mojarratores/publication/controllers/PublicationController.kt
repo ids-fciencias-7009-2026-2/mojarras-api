@@ -75,11 +75,7 @@ class PublicationController(
         authentication: Authentication
     ): ResponseEntity<PublicationResponse> {
 
-        val changes = request.applyTo(
-            Publication(ownerId = 0, petName = "", description = "", type = PetType.DOG, breed = "", zipCode = "")
-        )
-
-        val updated = publicationService.update(id, authentication.name, changes)
+        val updated = publicationService.update(id, authentication.name, request)
 
         return ResponseEntity.ok(updated.toPublicationResponse())
     }

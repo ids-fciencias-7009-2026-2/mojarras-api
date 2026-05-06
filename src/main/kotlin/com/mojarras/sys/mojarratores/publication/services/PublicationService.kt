@@ -7,6 +7,7 @@ import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
+import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationEntity
@@ -95,7 +96,7 @@ class PublicationService(
         }
     }
 
-    fun update(id: Long, email: String, changes: Publication): Publication {
+    fun update(id: Long, email: String, request: UpdatePublicationRequest): Publication {
 
         val existing = publicationRepository.findById(id)
             .orElseThrow { NotFoundException("Publication not found") }
@@ -107,15 +108,15 @@ class PublicationService(
             throw UnauthorizedException("Not your publication")
         }
 
-        val updated = existing.toPublication().copy(
-            petName     = changes.petName,
-            description = changes.description,
-            type        = changes.type,
-            breed       = changes.breed,
-            zipCode     = changes.zipCode
+        val updated = existing.copy(
+            petName     = request.petName     ?: existing.petName,
+            description = request.description ?: existing.description,
+            type        = request.type        ?: existing.type,
+            breed       = request.breed       ?: existing.breed,
+            zipCode     = request.zipCode     ?: existing.zipCode
         )
 
-        val saved = publicationRepository.save(updated.toPublicationEntity())
+        val saved = publicationRepository.save(updated)
 
         logger.info("Publication updated: $id by user ${user.email}")
 

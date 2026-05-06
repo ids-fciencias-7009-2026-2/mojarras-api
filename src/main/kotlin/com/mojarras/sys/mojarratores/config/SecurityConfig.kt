@@ -29,7 +29,7 @@ class SecurityConfig(
                 it.authenticationEntryPoint(jwtEntryPoint)
             }
             .authorizeHttpRequests {
-                it.requestMatchers("/users/login", "/users/register").permitAll()
+                it.requestMatchers("/users", "/users/login").permitAll()
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
