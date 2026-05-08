@@ -12,6 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +25,7 @@ class SecurityConfig(
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
+            .cors { }
             .csrf { it.disable() }
             .sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -30,6 +34,7 @@ class SecurityConfig(
                 it.authenticationEntryPoint(jwtEntryPoint)
             }
             .authorizeHttpRequests {
+                it.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 it.requestMatchers("/users/login").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/users").permitAll()
                 it.anyRequest().authenticated()
@@ -37,6 +42,30 @@ class SecurityConfig(
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val config = CorsConfiguration()
+
+        config.allowCredentials = true
+
+        config.allowedOrigins = listOf("http://localhost:3000")
+
+        config.allowedMethods = listOf(
+            "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        )
+
+        config.allowedHeaders = listOf("*")
+
+        config.exposedHeaders = listOf("Authorization")
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", config)
+
+        return source
+    }
+
+
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
