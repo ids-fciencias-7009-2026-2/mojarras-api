@@ -36,4 +36,18 @@ object PublicationSpecification {
             }
         }
     }
+
+    fun isNotOwner(userId: Long?): Specification<PublicationEntity>? {
+        return userId?.let {
+            Specification { root, _, cb ->
+                cb.notEqual(root.get<Long>("ownerId"), it)
+            }
+        }
+    }
+
+    fun isOwner(userId: Long): Specification<PublicationEntity> {
+        return Specification { root, _, cb ->
+            cb.equal(root.get<Long>("ownerId"), userId)
+        }
+    }
 }

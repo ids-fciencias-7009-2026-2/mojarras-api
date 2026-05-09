@@ -1,10 +1,13 @@
 package com.mojarras.sys.mojarratores.publication.controllers
 
 import com.mojarras.sys.mojarratores.publication.domain.PetType
+import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
+import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithOnePhotoResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithPhotosResponse
+import com.mojarras.sys.mojarratores.publication.mapper.applyTo
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationResponse
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationWithOnePhotoResponse
@@ -53,10 +56,11 @@ class PublicationController(
         @RequestParam(required = false) type: PetType?,
         @RequestParam(required = false) zipCode: String?,
         @RequestParam(required = false) breed: String?,
-        pageable: Pageable
+        pageable: Pageable,
+        authentication: Authentication
     ): ResponseEntity<Page<PublicationWithOnePhotoResponse>> {
 
-        val page = publicationService.getAll(type, zipCode, breed, pageable)
+        val page = publicationService.getAll(type, zipCode, breed, pageable, authentication.name)
 
         val response = page.map { (publication, thumbnail) ->
             publication.toPublicationWithOnePhotoResponse(thumbnail)
@@ -64,5 +68,44 @@ class PublicationController(
 
         return ResponseEntity.ok(response)
     }
+
+    @GetMapping("/me")
+    fun getMyPublications(
+        pageable: Pageable,
+        authentication: Authentication
+    ): ResponseEntity<Page<PublicationWithOnePhotoResponse>> {
+
+        val page = publicationService.getMyPublications(authentication.name, pageable)
+
+        val response = page.map { (publication, thumbnail) ->
+            publication.toPublicationWithOnePhotoResponse(thumbnail)
+        }
+
+        return ResponseEntity.ok(response)
+    }
+
+    @PatchMapping("/{id}")
+    fun update(
+        @PathVariable id: Long,
+        @Valid @RequestBody request: UpdatePublicationRequest,
+        authentication: Authentication
+    ): ResponseEntity<PublicationResponse> {
+
+        val updated = publicationService.update(id, authentication.name, request)
+
+        return ResponseEntity.ok(updated.toPublicationResponse())
+    }
+
+    @DeleteMapping("/{id}")
+    fun delete(
+        @PathVariable id: Long,
+        authentication: Authentication
+    ): ResponseEntity<Void> {
+
+        publicationService.delete(id, authentication.name)
+
+        return ResponseEntity.noContent().build()
+    }
+
 
 }

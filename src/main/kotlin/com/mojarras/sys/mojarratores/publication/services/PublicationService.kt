@@ -2,10 +2,12 @@ package com.mojarras.sys.mojarratores.publication.services
 
 import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
+import com.mojarras.sys.mojarratores.exception.UnauthorizedException
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
+import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationEntity
@@ -13,6 +15,7 @@ import com.mojarras.sys.mojarratores.publication.repositories.PublicationReposit
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationSpecification
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
 import org.springframework.stereotype.Service
+
 
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -64,11 +67,20 @@ class PublicationService(
         type: PetType?,
         zipCode: String?,
         breed: String?,
-        pageable: Pageable
+        pageable: Pageable,
+        email: String?
     ): Page<Pair<Publication, String?>> {
 
         var spec: Specification<PublicationEntity> =
             PublicationSpecification.hasStatus(PublicationStatus.ACTIVE)
+
+        val userId = email?.let {
+            userRepository.findByEmail(it)?.id
+        }
+
+        PublicationSpecification.isNotOwner(userId)?.let {
+            spec = spec.and(it)
+        }
 
         PublicationSpecification.hasType(type)?.let {
             spec = spec.and(it)
@@ -91,5 +103,69 @@ class PublicationService(
 
             Pair(entity.toPublication(), photo?.url)
         }
+    }
+
+    fun getMyPublications(
+        email: String,
+        pageable: Pageable
+    ): Page<Pair<Publication, String?>> {
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        val spec = PublicationSpecification.isOwner(user.id!!)
+
+        val page = publicationRepository.findAll(spec, pageable)
+
+        return page.map { entity ->
+            val photo = photoRepository
+                .findTopByPublicationIdOrderByIdAsc(entity.id!!)
+
+            Pair(entity.toPublication(), photo?.url)
+        }
+    }
+
+    fun update(id: Long, email: String, request: UpdatePublicationRequest): Publication {
+
+        val existing = publicationRepository.findById(id)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (existing.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        val updated = existing.copy(
+            petName     = request.petName     ?: existing.petName,
+            description = request.description ?: existing.description,
+            type        = request.type        ?: existing.type,
+            breed       = request.breed       ?: existing.breed,
+            zipCode     = request.zipCode     ?: existing.zipCode
+        )
+
+        val saved = publicationRepository.save(updated)
+
+        logger.info("Publication updated: $id by user ${user.email}")
+
+        return saved.toPublication()
+    }
+
+    fun delete(id: Long, email: String) {
+
+        val publication = publicationRepository.findById(id)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (publication.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        publicationRepository.deleteById(id)
+
+        logger.info("Publication deleted: $id by user ${user.email}")
     }
 }

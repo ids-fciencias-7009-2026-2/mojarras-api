@@ -35,13 +35,15 @@ class InterestService(
             throw BadRequestException("You cannot mark interest in your own publication")
         }
 
-        if (interestRepository.existsByPublicationIdAndInterestedUserId(publicationId, user.id!!)) {
+        val userId = requireNotNull(user.id) { "The user ID cannot be null" }
+
+        if (interestRepository.existsByPublicationIdAndInterestedUserId(publicationId, userId)) {
             throw ConflictException("You already marked interest")
         }
 
         val interest = Interest(
             publicationId = publicationId,
-            interestedUserId = user.id
+            interestedUserId = userId
         )
 
         interestRepository.save(interest.toInterestEntity())

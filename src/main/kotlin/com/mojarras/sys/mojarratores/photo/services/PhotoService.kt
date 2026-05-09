@@ -73,4 +73,29 @@ class PhotoService(
         return photoRepository.findAllByPublicationId(publicationId)
             .map { it.toPhoto() }
     }
+
+    @Transactional
+    fun deletePhoto(photoId: Long, publicationId: Long, email: String) {
+
+        val photo = photoRepository.findById(photoId)
+            .orElseThrow { NotFoundException("Photo not found") }
+
+        if (photo.publicationId != publicationId) {
+            throw BadRequestException("Photo does not belong to this publication")
+        }
+
+        val publication = publicationRepository.findById(publicationId)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (publication.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        photoRepository.deleteById(photoId)
+
+        logger.info("Photo deleted: $photoId from publication: $publicationId")
+    }
 }

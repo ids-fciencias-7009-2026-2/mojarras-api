@@ -8,139 +8,361 @@
   },
   "item": [
     {
-      "name": "Register User",
-      "event": [
+      "name": "Users",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "let jsonData = pm.response.json();",
-              "if(jsonData && jsonData.email){",
-              "   pm.collectionVariables.set(\"userEmail\", jsonData.email);",
-              "}"
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.email) {",
+                  "  pm.collectionVariables.set(\"userEmail\", jsonData.email);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"user{{$timestamp}}@example.com\",\n  \"password\": \"123456\",\n  \"username\": \"user{{$timestamp}}\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"zipCode\": \"12345\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/users/register",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "register"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Login",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "let jsonData = pm.response.json();",
-              "if(jsonData && jsonData.token){",
-              "   pm.collectionVariables.set(\"token\", jsonData.token);",
-              "}"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/users/login",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Me",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/me",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "me"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Update User",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user{{$timestamp}}@example.com\",\n  \"password\": \"123456\",\n  \"username\": \"user{{$timestamp}}\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"zipCode\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
           },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"updated{{$timestamp}}@example.com\",\n  \"password\": \"newpass123\",\n  \"username\": \"updatedUser{{$timestamp}}\",\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"zipCode\": \"54321\"\n}"
+          "response": []
         },
-        "url": {
-          "raw": "{{baseUrl}}/users",
-          "host": [
-            "{{baseUrl}}"
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.token) {",
+                  "  pm.collectionVariables.set(\"token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
           ],
-          "path": [
-            "users"
-          ]
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updated{{$timestamp}}@example.com\",\n  \"password\": \"newpass123\",\n  \"username\": \"updatedUser{{$timestamp}}\",\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"zipCode\": \"54321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
+    },
+    {
+      "name": "Publications",
+      "item": [
+        {
+          "name": "Create Publication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "  pm.collectionVariables.set(\"publicationId\", jsonData.id.toString());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petName\": \"Milo{{$timestamp}}\",\n  \"description\": \"Busca un hogar temporal y responsable\",\n  \"type\": \"DOG\",\n  \"breed\": \"Labrador\",\n  \"zipCode\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/publications",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Publications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications?page=0&size=10&sort=id,desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Publication By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications", "{{publicationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Publication",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petName\": \"Milo actualizado\",\n  \"description\": \"Busca un hogar estable, responsable y con tiempo para cuidarlo\",\n  \"type\": \"DOG\",\n  \"breed\": \"Labrador\",\n  \"zipCode\": \"54321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications", "{{publicationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Publication",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications", "{{publicationId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Photos",
+      "item": [
+        {
+          "name": "Upload Photos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}/photos",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications", "{{publicationId}}", "photos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Photo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}/photos/{{photoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "publications",
+                "{{publicationId}}",
+                "photos",
+                "{{photoId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Interest",
+      "item": [
+        {
+          "name": "Mark Interest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}/interest",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications", "{{publicationId}}", "interest"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Interested Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}/interest",
+              "host": ["{{baseUrl}}"],
+              "path": ["publications", "{{publicationId}}", "interest"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -154,6 +376,14 @@
     },
     {
       "key": "userEmail",
+      "value": ""
+    },
+    {
+      "key": "publicationId",
+      "value": ""
+    },
+    {
+      "key": "photoId",
       "value": ""
     }
   ]
