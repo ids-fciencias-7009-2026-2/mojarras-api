@@ -56,10 +56,26 @@ class PublicationController(
         @RequestParam(required = false) type: PetType?,
         @RequestParam(required = false) zipCode: String?,
         @RequestParam(required = false) breed: String?,
-        pageable: Pageable
+        pageable: Pageable,
+        authentication: Authentication
     ): ResponseEntity<Page<PublicationWithOnePhotoResponse>> {
 
-        val page = publicationService.getAll(type, zipCode, breed, pageable)
+        val page = publicationService.getAll(type, zipCode, breed, pageable, authentication.name)
+
+        val response = page.map { (publication, thumbnail) ->
+            publication.toPublicationWithOnePhotoResponse(thumbnail)
+        }
+
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/me")
+    fun getMyPublications(
+        pageable: Pageable,
+        authentication: Authentication
+    ): ResponseEntity<Page<PublicationWithOnePhotoResponse>> {
+
+        val page = publicationService.getMyPublications(authentication.name, pageable)
 
         val response = page.map { (publication, thumbnail) ->
             publication.toPublicationWithOnePhotoResponse(thumbnail)

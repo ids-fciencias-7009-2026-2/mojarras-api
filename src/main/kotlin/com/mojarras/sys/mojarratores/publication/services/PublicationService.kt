@@ -67,11 +67,20 @@ class PublicationService(
         type: PetType?,
         zipCode: String?,
         breed: String?,
-        pageable: Pageable
+        pageable: Pageable,
+        email: String?
     ): Page<Pair<Publication, String?>> {
 
         var spec: Specification<PublicationEntity> =
             PublicationSpecification.hasStatus(PublicationStatus.ACTIVE)
+
+        val userId = email?.let {
+            userRepository.findByEmail(it)?.id
+        }
+
+        PublicationSpecification.isNotOwner(userId)?.let {
+            spec = spec.and(it)
+        }
 
         PublicationSpecification.hasType(type)?.let {
             spec = spec.and(it)
@@ -89,6 +98,26 @@ class PublicationService(
 
         return page.map { entity ->
 
+            val photo = photoRepository
+                .findTopByPublicationIdOrderByIdAsc(entity.id!!)
+
+            Pair(entity.toPublication(), photo?.url)
+        }
+    }
+
+    fun getMyPublications(
+        email: String,
+        pageable: Pageable
+    ): Page<Pair<Publication, String?>> {
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        val spec = PublicationSpecification.isOwner(user.id!!)
+
+        val page = publicationRepository.findAll(spec, pageable)
+
+        return page.map { entity ->
             val photo = photoRepository
                 .findTopByPublicationIdOrderByIdAsc(entity.id!!)
 
