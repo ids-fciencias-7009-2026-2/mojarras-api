@@ -5,6 +5,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.multipart.MaxUploadSizeExceededException
 import tools.jackson.databind.exc.InvalidFormatException
 
 
@@ -48,7 +49,7 @@ class GlobalExceptionHandler {
                 "timestamp" to java.time.LocalDateTime.now().toString(),
                 "status" to HttpStatus.BAD_REQUEST.value(),
                 "error" to "Bad Request",
-                "message" to "Error de validación en los campos",
+                "message" to "Validation error in the fields",
                 "validation_errors" to errors
             )
         )
@@ -69,12 +70,12 @@ class GlobalExceptionHandler {
             }
 
             if (enums != null) {
-                "Valor inválido para '$fieldName'. Opciones válidas: [$enums]"
+                "Invalid value for '$fieldName'. Valid options: [$enums]"
             } else {
-                "Valor inválido para el campo '$fieldName'."
+                "Invalid value for field '$fieldName'."
             }
         } else {
-            "Error de lectura: El cuerpo JSON está mal formado o contiene valores incompatibles."
+            "Read error: The JSON body is malformed or contains incompatible values."
         }
 
         return buildResponse(HttpStatus.BAD_REQUEST, message)
@@ -82,5 +83,15 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException) =
-        buildResponse(HttpStatus.BAD_REQUEST, "El valor '${ex.value}' no es válido para el parámetro '${ex.name}'")
+        buildResponse(HttpStatus.BAD_REQUEST, "The value '${ex.value}' is not valid for parameter '${ex.name}'")
+
+    @ExceptionHandler(MaxUploadSizeExceededException::class)
+    fun handleMaxUploadSize(ex: MaxUploadSizeExceededException) =
+        buildResponse(
+            HttpStatus.PAYLOAD_TOO_LARGE, "Upload size exceeded. Maximum allowed is 6MB per file and 30MB per request.")
+
+    @ExceptionHandler(Exception::class)
+    fun handleGenericException(ex: Exception) =
+        buildResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred: ${ex.message ?: "No details available"}")
 }
