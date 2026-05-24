@@ -3,6 +3,7 @@ package com.mojarras.sys.mojarratores.publication.services
 import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.exception.UnauthorizedException
+import com.mojarras.sys.mojarratores.map.services.PostalCodeLocationService
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
@@ -26,7 +27,8 @@ import org.springframework.data.jpa.domain.Specification
 class PublicationService(
     private val publicationRepository: PublicationRepository,
     private val userRepository: UserRepository,
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
+    private val postalCodeLocationService: PostalCodeLocationService
 ) {
 
     private val logger = LoggerFactory.getLogger(PublicationService::class.java)
@@ -35,6 +37,8 @@ class PublicationService(
 
         val user = userRepository.findByEmail(email)
             ?: throw NotFoundException("User not found")
+
+        postalCodeLocationService.getOrCreate(publication.zipCode)
 
         val publicationEntity = publication.copy(
             ownerId = user.id!!,

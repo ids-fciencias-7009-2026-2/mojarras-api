@@ -8,3 +8,9 @@ fun PostalCodeLocationEntity.toDomain() = PostalCodeLocation(
     lat = lat,
     lng = lng
 )
+
+fun PostalCodeLocation.toEntity() = PostalCodeLocationEntity(
+    zipCode = zipCode,
+    lat = lat,
+    lng = lng
+)
