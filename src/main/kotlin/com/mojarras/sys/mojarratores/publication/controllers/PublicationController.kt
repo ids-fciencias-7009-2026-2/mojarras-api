@@ -44,10 +44,10 @@ class PublicationController(
     @GetMapping("/{id}")
     fun getById(@PathVariable id: Long): ResponseEntity<PublicationWithPhotosResponse> {
 
-        val (publication, photos) = publicationService.getById(id)
+        val (publication, photos, breedInfo) = publicationService.getById(id)
 
         return ResponseEntity.ok(
-            publication.toPublicationWithPhotosResponse(photos)
+            publication.toPublicationWithPhotosResponse(photos, breedInfo)
         )
     }
 

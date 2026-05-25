@@ -8,6 +8,7 @@ data class PublicationWithPhotosResponse(
     val description: String,
     val type: PetType,
     val breed: String?,
+    val breedInfo: BreedInfoResponse?,
     val zipCode: String,
     val photos: List<String>
 )

@@ -5,13 +5,16 @@ import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.exception.UnauthorizedException
 import com.mojarras.sys.mojarratores.map.services.PostalCodeLocationService
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
+import com.mojarras.sys.mojarratores.publication.domain.BreedInfo
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
+import com.mojarras.sys.mojarratores.publication.mapper.toDomain
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationEntity
+import com.mojarras.sys.mojarratores.publication.repositories.BreedInfoRepository
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationRepository
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationSpecification
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
@@ -28,7 +31,9 @@ class PublicationService(
     private val publicationRepository: PublicationRepository,
     private val userRepository: UserRepository,
     private val photoRepository: PhotoRepository,
-    private val postalCodeLocationService: PostalCodeLocationService
+    private val postalCodeLocationService: PostalCodeLocationService,
+    private val breedService: BreedService,
+    private val breedRepository: BreedInfoRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(PublicationService::class.java)
@@ -40,10 +45,17 @@ class PublicationService(
 
         postalCodeLocationService.getOrCreate(publication.zipCode)
 
+        val breedInfo = breedService.getOrCreateBreedInfo(
+            publication.type,
+            publication.breed
+        )
+
         val publicationEntity = publication.copy(
             ownerId = user.id!!,
             status = PublicationStatus.DRAFT
-        ).toPublicationEntity()
+        ).toPublicationEntity().copy(
+            breedInfoId = breedInfo?.id
+        )
 
         val saved = publicationRepository.save(publicationEntity)
 
@@ -52,7 +64,7 @@ class PublicationService(
         return saved.toPublication()
     }
 
-    fun getById(id: Long): Pair<Publication, List<String>> {
+    fun getById(id: Long): Triple<Publication, List<String>, BreedInfo?> {
 
         val publication = publicationRepository.findById(id)
             .orElseThrow { NotFoundException("Publication not found") }
@@ -64,7 +76,11 @@ class PublicationService(
         val photos = photoRepository.findAllByPublicationId(id)
             .map { it.url }
 
-        return Pair(publication.toPublication(), photos)
+        val breedInfo = publication.breedInfoId?.let {
+            breedRepository.findById(it).orElse(null)?.toDomain()
+        }
+
+        return Triple(publication.toPublication(), photos, breedInfo)
     }
 
     fun getAll(

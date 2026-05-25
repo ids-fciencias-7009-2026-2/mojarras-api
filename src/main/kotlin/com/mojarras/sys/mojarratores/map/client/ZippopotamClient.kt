@@ -1,4 +1,4 @@
-package com.mojarras.sys.mojarratores.map.services
+package com.mojarras.sys.mojarratores.map.client
 
 import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException

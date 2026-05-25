@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.map.services
 
+import com.mojarras.sys.mojarratores.map.client.ZippopotamClient
 import com.mojarras.sys.mojarratores.map.domain.PostalCodeLocation
 import com.mojarras.sys.mojarratores.map.mapper.toDomain
 import com.mojarras.sys.mojarratores.map.mapper.toEntity
