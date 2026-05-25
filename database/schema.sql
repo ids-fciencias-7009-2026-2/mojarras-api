@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS interests;
 DROP TABLE IF EXISTS photos;
+DROP TABLE IF EXISTS verification_tokens;
 DROP TABLE IF EXISTS publications;
 DROP TABLE IF EXISTS users;
 
@@ -11,9 +12,23 @@ CREATE TABLE users (
                        email VARCHAR(150) NOT NULL UNIQUE,
                        password VARCHAR(255) NOT NULL,
                        zip_code VARCHAR(10) NOT NULL,
+                       is_verified BOOLEAN NOT NULL DEFAULT false,
                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                        deleted_at TIMESTAMP NULL
+);
+
+CREATE TABLE verification_tokens (
+                        id BIGSERIAL PRIMARY KEY,
+                        token VARCHAR(255) NOT NULL UNIQUE,
+                        user_id BIGINT NOT NULL,
+                        expiry_date TIMESTAMP NOT NULL,
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                         CONSTRAINT fk_verification_token_user
+                             FOREIGN KEY (user_id)
+                                 REFERENCES users(id)
+                                 ON DELETE CASCADE
 );
 
 CREATE TABLE publications (

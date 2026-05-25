@@ -37,6 +37,7 @@ class SecurityConfig(
                 it.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 it.requestMatchers("/users/login").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/users").permitAll()
+                it.requestMatchers(HttpMethod.POST, "/users/verify").permitAll()
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)

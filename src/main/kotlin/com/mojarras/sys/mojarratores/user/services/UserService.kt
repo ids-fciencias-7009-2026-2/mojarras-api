@@ -4,13 +4,16 @@ import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.ConflictException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.exception.UnauthorizedException
+import com.mojarras.sys.mojarratores.infrastructure.EmailService
 import com.mojarras.sys.mojarratores.security.JwtUtil
 import com.mojarras.sys.mojarratores.user.domain.User
 import com.mojarras.sys.mojarratores.user.dto.request.UpdateUserRequest
 import com.mojarras.sys.mojarratores.user.dto.response.AuthResponse
+import com.mojarras.sys.mojarratores.user.entities.VerificationTokenEntity
 import com.mojarras.sys.mojarratores.user.mapper.toUser
 import com.mojarras.sys.mojarratores.user.mapper.toUserEntity
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
+import com.mojarras.sys.mojarratores.user.repositories.VerificationTokenRepository
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -20,6 +23,8 @@ import java.time.LocalDateTime
 @Service
 class UserService (
     private val userRepository: UserRepository,
+    private val tokenRepository: VerificationTokenRepository,
+    private val emailService: EmailService,
     private val passwordEncoder: PasswordEncoder,
     private val jwtUtil: JwtUtil
 ) {
@@ -42,6 +47,20 @@ class UserService (
         val userEntity = user.toUserEntity(encodedPassword)
         val savedUser = userRepository.save(userEntity)
 
+        val token = java.util.UUID.randomUUID().toString()
+        val verificationToken = VerificationTokenEntity(
+            token = token,
+            userId = savedUser.id!!,
+            expiryDate = LocalDateTime.now().plusHours(24)
+        )
+        tokenRepository.save(verificationToken)
+
+        emailService.sendVerificationEmail(
+            userEmail = savedUser.email,
+            userName = savedUser.firstName,
+            token = token
+        )
+
         logger.info("User added: ${savedUser.email}")
 
         return savedUser.toUser()
@@ -52,6 +71,9 @@ class UserService (
         val entity = userRepository.findByEmail(email)
             ?: throw NotFoundException("User not found")
 
+        if (!entity.isVerified) {
+            throw UnauthorizedException("User is not verified")
+        }
 
         if (!passwordEncoder.matches(password, entity.passwordHash)) {
             throw UnauthorizedException("Invalid credentials")
@@ -65,6 +87,25 @@ class UserService (
             token,
             Instant.now().plusSeconds(jwtUtil.expiration).toString()
         )
+    }
+    fun verifyUser(token: String) {
+        val verificationToken = tokenRepository.findByToken(token)
+            ?: throw NotFoundException("Token not found")
+
+        if (verificationToken.expiryDate.isBefore(LocalDateTime.now())) {
+            throw BadRequestException("Token expired")
+        }
+
+        val userEntity = userRepository.findById(verificationToken.userId)
+            .orElseThrow { NotFoundException("User not found") }
+
+        userEntity.isVerified = true
+        userEntity.updatedAt = LocalDateTime.now()
+
+        userRepository.save(userEntity)
+        tokenRepository.delete(verificationToken)
+
+        logger.info("User verified: ${userEntity.email}")
     }
 
     /*
