@@ -67,12 +67,18 @@ class PublicationService(
         return saved.toPublication()
     }
 
-    fun getById(id: Long): Triple<Publication, List<PhotoResponse>, BreedInfo?> {
+    fun getById(id: Long, email: String?): Triple<Publication, List<PhotoResponse>, BreedInfo?> {
 
         val publication = publicationRepository.findById(id)
             .orElseThrow { NotFoundException("Publication not found") }
 
-        if (publication.status != PublicationStatus.ACTIVE) {
+        val userId = email?.let {
+            userRepository.findByEmail(it)?.id
+        }
+
+        val isOwner = userId != null && publication.ownerId == userId
+
+        if (publication.status != PublicationStatus.ACTIVE && !isOwner) {
             throw NotFoundException("Publication not available")
         }
 
@@ -211,5 +217,32 @@ class PublicationService(
         publicationRepository.deleteById(id)
 
         logger.info("Publication deleted: $id by user ${user.email}")
+    }
+
+    fun markAsAdopted(id: Long, email: String): Publication {
+
+        val publication = publicationRepository.findById(id)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (publication.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        if (publication.status != PublicationStatus.ACTIVE) {
+            throw BadRequestException("Only ACTIVE publications can be marked as adopted")
+        }
+
+        val updated = publication.copy(
+            status = PublicationStatus.ADOPTED
+        )
+
+        val saved = publicationRepository.save(updated)
+
+        logger.info("Publication marked as ADOPTED: $id")
+
+        return saved.toPublication()
     }
 }
