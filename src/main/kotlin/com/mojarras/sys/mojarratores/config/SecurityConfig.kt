@@ -38,6 +38,11 @@ class SecurityConfig(
                 it.requestMatchers("/users/login").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/users").permitAll()
                 it.requestMatchers(HttpMethod.POST, "/users/verify").permitAll()
+                it.requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)

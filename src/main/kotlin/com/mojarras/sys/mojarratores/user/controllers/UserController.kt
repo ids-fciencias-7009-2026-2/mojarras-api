@@ -53,31 +53,6 @@ class UserController (
         return ResponseEntity.ok(authResponse)
     }
 
-    /*
-    /**
-     * Endpoint que simula cerrar sesion del usuario
-     * */
-    @PostMapping("/logout")
-    @ResponseBody
-    fun logout(
-        @RequestHeader ("Authorization") token: String
-    ): ResponseEntity<LogoutResponse> {
-
-        val exit = userService.logout(token)
-
-        if (!exit) {
-            logger.error("Logout failed, token $token not found")
-            return ResponseEntity.status(401).build()
-        }
-        logger.info("Logout successful for $token")
-        val response = LogoutResponse(
-            userId = token,
-            logoutDateTime = LocalDateTime.now().toString()
-        )
-        return ResponseEntity.ok(response)
-    }
-     */
-
     @PutMapping
     fun updateUser(
         authentication: Authentication,
