@@ -22,7 +22,8 @@ fun User.toUserEntity(passwordHash: String) = UserEntity(
     username = username,
     firstName = firstName,
     lastName = lastName,
-    zipCode = zipCode
+    zipCode = zipCode,
+    isVerified = isVerified
 )
 
 // Entity → Domain
@@ -33,7 +34,8 @@ fun UserEntity.toUser() = User(
     username = username,
     firstName = firstName,
     lastName = lastName,
-    zipCode = zipCode
+    zipCode = zipCode,
+    isVerified = isVerified
 )
 
 // Domain → Response
@@ -43,5 +45,5 @@ fun User.toUserResponse() = UserResponse(
     username = username,
     firstName = firstName,
     lastName = lastName,
-    zipCode = zipCode
+    zipCode = zipCode,
 )

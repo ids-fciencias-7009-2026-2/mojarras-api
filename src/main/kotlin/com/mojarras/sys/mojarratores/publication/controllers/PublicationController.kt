@@ -42,12 +42,15 @@ class PublicationController(
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: Long): ResponseEntity<PublicationWithPhotosResponse> {
+    fun getById(
+        @PathVariable id: Long,
+        authentication: Authentication
+    ): ResponseEntity<PublicationWithPhotosResponse> {
 
-        val (publication, photos) = publicationService.getById(id)
+        val (publication, photos, breedInfo) = publicationService.getById(id, authentication.name)
 
         return ResponseEntity.ok(
-            publication.toPublicationWithPhotosResponse(photos)
+            publication.toPublicationWithPhotosResponse(photos, breedInfo)
         )
     }
 
@@ -107,5 +110,15 @@ class PublicationController(
         return ResponseEntity.noContent().build()
     }
 
+    @PatchMapping("/{id}/adopt")
+    fun markAsAdopted(
+        @PathVariable id: Long,
+        authentication: Authentication
+    ): ResponseEntity<PublicationResponse> {
+
+        val updated = publicationService.markAsAdopted(id, authentication.name)
+
+        return ResponseEntity.ok(updated.toPublicationResponse())
+    }
 
 }

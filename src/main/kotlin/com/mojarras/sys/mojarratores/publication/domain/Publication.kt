@@ -22,5 +22,6 @@ enum class PetType {
 
 enum class PublicationStatus {
     DRAFT,
-    ACTIVE
+    ACTIVE,
+    ADOPTED
 }

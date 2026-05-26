@@ -19,5 +19,8 @@ data class PhotoEntity(
     val publicationId: Long,
 
     @Column(nullable = false)
-    val url: String
+    val url: String,
+
+    @Column(name = "public_id", nullable = false)
+    val publicId: String
 )

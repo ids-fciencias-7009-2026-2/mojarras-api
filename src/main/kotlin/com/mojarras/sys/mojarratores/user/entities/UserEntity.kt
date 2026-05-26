@@ -33,6 +33,9 @@ data class UserEntity(
     @Column(name = "zip_code", nullable = false)
     var zipCode: String,
 
+    @Column(name = "is_verified", nullable = false)
+    var isVerified: Boolean = false,
+
     @Column(name = "created_at")
     var createdAt: LocalDateTime = LocalDateTime.now(),
 

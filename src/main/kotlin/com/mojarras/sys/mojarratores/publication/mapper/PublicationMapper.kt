@@ -1,9 +1,12 @@
 package com.mojarras.sys.mojarratores.publication.mapper
 
+import com.mojarras.sys.mojarratores.photo.dto.response.PhotoResponse
+import com.mojarras.sys.mojarratores.publication.domain.BreedInfo
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import com.mojarras.sys.mojarratores.publication.dto.request.CreatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
+import com.mojarras.sys.mojarratores.publication.dto.response.BreedInfoResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithOnePhotoResponse
 import com.mojarras.sys.mojarratores.publication.dto.response.PublicationWithPhotosResponse
@@ -56,15 +59,26 @@ fun Publication.toPublicationResponse() = PublicationResponse(
 )
 
 // Domain(complement) → Response
-fun Publication.toPublicationWithPhotosResponse(photos: List<String>) =
-    PublicationWithPhotosResponse(
-        id = requireNotNull(id),
-        petName = petName,
-        description = description,
-        type = type,
-        breed = breed,
-        zipCode = zipCode,
-        photos = photos
+fun Publication.toPublicationWithPhotosResponse(
+    photos: List<PhotoResponse>,
+    breedInfo: BreedInfo?
+) = PublicationWithPhotosResponse(
+    id = requireNotNull(id),
+    petName = petName,
+    description = description,
+    type = type,
+    breed = breed,
+    zipCode = zipCode,
+    photos = photos,
+    breedInfo = breedInfo?.let {
+        BreedInfoResponse(
+            breedName = it.breedName,
+            temperament = it.temperament,
+            origin = it.origin,
+            lifeSpan = it.lifeSpan,
+            description = it.description
+        )
+    }
 )
 
 // Domain(complement) → Response

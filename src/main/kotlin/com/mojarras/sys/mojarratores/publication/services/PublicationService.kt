@@ -3,14 +3,20 @@ package com.mojarras.sys.mojarratores.publication.services
 import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.exception.UnauthorizedException
+import com.mojarras.sys.mojarratores.map.services.PostalCodeLocationService
+import com.mojarras.sys.mojarratores.photo.dto.response.PhotoResponse
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
+import com.mojarras.sys.mojarratores.photo.services.PhotoService
+import com.mojarras.sys.mojarratores.publication.domain.BreedInfo
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
 import com.mojarras.sys.mojarratores.publication.dto.request.UpdatePublicationRequest
 import com.mojarras.sys.mojarratores.publication.entities.PublicationEntity
+import com.mojarras.sys.mojarratores.publication.mapper.toDomain
 import com.mojarras.sys.mojarratores.publication.mapper.toPublication
 import com.mojarras.sys.mojarratores.publication.mapper.toPublicationEntity
+import com.mojarras.sys.mojarratores.publication.repositories.BreedInfoRepository
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationRepository
 import com.mojarras.sys.mojarratores.publication.repositories.PublicationSpecification
 import com.mojarras.sys.mojarratores.user.repositories.UserRepository
@@ -26,7 +32,11 @@ import org.springframework.data.jpa.domain.Specification
 class PublicationService(
     private val publicationRepository: PublicationRepository,
     private val userRepository: UserRepository,
-    private val photoRepository: PhotoRepository
+    private val photoService: PhotoService,
+    private val photoRepository: PhotoRepository,
+    private val postalCodeLocationService: PostalCodeLocationService,
+    private val breedService: BreedService,
+    private val breedRepository: BreedInfoRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(PublicationService::class.java)
@@ -36,10 +46,19 @@ class PublicationService(
         val user = userRepository.findByEmail(email)
             ?: throw NotFoundException("User not found")
 
+        postalCodeLocationService.getOrCreate(publication.zipCode)
+
+        val breedInfo = breedService.getOrCreateBreedInfo(
+            publication.type,
+            publication.breed
+        )
+
         val publicationEntity = publication.copy(
             ownerId = user.id!!,
             status = PublicationStatus.DRAFT
-        ).toPublicationEntity()
+        ).toPublicationEntity().copy(
+            breedInfoId = breedInfo?.id
+        )
 
         val saved = publicationRepository.save(publicationEntity)
 
@@ -48,19 +67,34 @@ class PublicationService(
         return saved.toPublication()
     }
 
-    fun getById(id: Long): Pair<Publication, List<String>> {
+    fun getById(id: Long, email: String?): Triple<Publication, List<PhotoResponse>, BreedInfo?> {
 
         val publication = publicationRepository.findById(id)
             .orElseThrow { NotFoundException("Publication not found") }
 
-        if (publication.status != PublicationStatus.ACTIVE) {
+        val userId = email?.let {
+            userRepository.findByEmail(it)?.id
+        }
+
+        val isOwner = userId != null && publication.ownerId == userId
+
+        if (publication.status != PublicationStatus.ACTIVE && !isOwner) {
             throw NotFoundException("Publication not available")
         }
 
         val photos = photoRepository.findAllByPublicationId(id)
-            .map { it.url }
+            .map {
+                PhotoResponse(
+                    id = it.id!!,
+                    url = it.url
+                )
+            }
 
-        return Pair(publication.toPublication(), photos)
+        val breedInfo = publication.breedInfoId?.let {
+            breedRepository.findById(it).orElse(null)?.toDomain()
+        }
+
+        return Triple(publication.toPublication(), photos, breedInfo)
     }
 
     fun getAll(
@@ -137,12 +171,31 @@ class PublicationService(
             throw UnauthorizedException("Not your publication")
         }
 
+        val newType = request.type ?: existing.type
+        val newBreed = request.breed ?: existing.breed
+        val newZipCode = request.zipCode ?: existing.zipCode
+
+        if (newZipCode != existing.zipCode) {
+            postalCodeLocationService.getOrCreate(newZipCode)
+        }
+
+        val breedChanged =
+            newType != existing.type || newBreed != existing.breed
+
+        val newBreedInfoId = if (breedChanged) {
+            val breedInfo = breedService.getOrCreateBreedInfo(newType, newBreed)
+            breedInfo?.id
+        } else {
+            existing.breedInfoId
+        }
+
         val updated = existing.copy(
             petName     = request.petName     ?: existing.petName,
             description = request.description ?: existing.description,
-            type        = request.type        ?: existing.type,
-            breed       = request.breed       ?: existing.breed,
-            zipCode     = request.zipCode     ?: existing.zipCode
+            type        = newType,
+            breed       = newBreed,
+            zipCode     = newZipCode,
+            breedInfoId = newBreedInfoId
         )
 
         val saved = publicationRepository.save(updated)
@@ -164,8 +217,37 @@ class PublicationService(
             throw UnauthorizedException("Not your publication")
         }
 
+        photoService.deleteAllByPublication(id)
+
         publicationRepository.deleteById(id)
 
         logger.info("Publication deleted: $id by user ${user.email}")
+    }
+
+    fun markAsAdopted(id: Long, email: String): Publication {
+
+        val publication = publicationRepository.findById(id)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw NotFoundException("User not found")
+
+        if (publication.ownerId != user.id) {
+            throw UnauthorizedException("Not your publication")
+        }
+
+        if (publication.status != PublicationStatus.ACTIVE) {
+            throw BadRequestException("Only ACTIVE publications can be marked as adopted")
+        }
+
+        val updated = publication.copy(
+            status = PublicationStatus.ADOPTED
+        )
+
+        val saved = publicationRepository.save(updated)
+
+        logger.info("Publication marked as ADOPTED: $id")
+
+        return saved.toPublication()
     }
 }

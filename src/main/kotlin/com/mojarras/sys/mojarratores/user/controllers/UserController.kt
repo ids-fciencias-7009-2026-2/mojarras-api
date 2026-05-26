@@ -5,6 +5,7 @@ import com.mojarras.sys.mojarratores.user.dto.request.UpdateUserRequest
 import com.mojarras.sys.mojarratores.user.dto.request.LoginRequest
 import com.mojarras.sys.mojarratores.user.dto.response.AuthResponse
 import com.mojarras.sys.mojarratores.user.dto.response.UserResponse
+import com.mojarras.sys.mojarratores.user.dto.response.VerificationResponse
 import com.mojarras.sys.mojarratores.user.mapper.toUser
 import com.mojarras.sys.mojarratores.user.mapper.toUserResponse
 import com.mojarras.sys.mojarratores.user.services.UserService
@@ -86,5 +87,13 @@ class UserController (
         val updatedUser = userService.updateUser(authentication.name, updateUserRequest)
 
         return ResponseEntity.ok(updatedUser.toUserResponse())
+    }
+
+    @PostMapping("/verify")
+    fun verifyEmail(
+        @RequestParam token: String
+    ): ResponseEntity<VerificationResponse> {
+        userService.verifyUser(token)
+        return ResponseEntity.ok(VerificationResponse("Account verified"))
     }
 }
