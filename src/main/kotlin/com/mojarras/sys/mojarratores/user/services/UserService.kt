@@ -108,16 +108,6 @@ class UserService (
         logger.info("User verified: ${userEntity.email}")
     }
 
-    /*
-    fun logout(token: String): Boolean{
-        val userEntity = userRepository.findByToken(token)
-            ?: return false
-
-        userRepository.updateTokenById(userEntity.id!!, null)
-        return true
-    }
-     */
-
     fun getMe(email: String): User{
         return userRepository.findByEmail(email)
             ?.toUser()
