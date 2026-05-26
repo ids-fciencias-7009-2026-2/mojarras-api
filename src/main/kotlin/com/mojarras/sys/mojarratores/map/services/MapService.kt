@@ -3,6 +3,7 @@ package com.mojarras.sys.mojarratores.map.services
 import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.map.dto.response.MapPublicationItem
 import com.mojarras.sys.mojarratores.map.dto.response.MapPublicationResponse
+import com.mojarras.sys.mojarratores.map.dto.response.PublicationLocationResponse
 import com.mojarras.sys.mojarratores.map.repositories.PostalCodeLocationRepository
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
 import com.mojarras.sys.mojarratores.publication.domain.PetType
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 class MapService(
     private val publicationRepository: PublicationRepository,
     private val photoRepository: PhotoRepository,
+    private val postalCodeLocationService: PostalCodeLocationService,
     private val postalCodeLocationRepository: PostalCodeLocationRepository,
     private val userRepository: UserRepository
 ) {
@@ -92,4 +94,35 @@ class MapService(
 
         return result
     }
+
+    fun getPublicationLocation(
+        publicationId: Long,
+        email: String?
+    ): PublicationLocationResponse {
+
+        val publication = publicationRepository.findById(publicationId)
+            .orElseThrow { NotFoundException("Publication not found") }
+
+        val userId = email?.let {
+            userRepository.findByEmail(it)?.id
+        }
+
+        val isOwner = userId != null && publication.ownerId == userId
+
+        if (publication.status != PublicationStatus.ACTIVE && !isOwner) {
+            throw NotFoundException("Publication not available")
+        }
+
+        val location = postalCodeLocationService.getOrCreate(publication.zipCode)
+
+        return PublicationLocationResponse(
+            zipCode = location.zipCode,
+            lat = location.lat,
+            lng = location.lng
+        )
+    }
+
+
+
+
 }
