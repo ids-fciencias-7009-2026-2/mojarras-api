@@ -5,6 +5,7 @@ import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.exception.UnauthorizedException
 import com.mojarras.sys.mojarratores.map.services.PostalCodeLocationService
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
+import com.mojarras.sys.mojarratores.photo.services.PhotoService
 import com.mojarras.sys.mojarratores.publication.domain.BreedInfo
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 import com.mojarras.sys.mojarratores.publication.domain.Publication
@@ -30,6 +31,7 @@ import org.springframework.data.jpa.domain.Specification
 class PublicationService(
     private val publicationRepository: PublicationRepository,
     private val userRepository: UserRepository,
+    private val photoService: PhotoService,
     private val photoRepository: PhotoRepository,
     private val postalCodeLocationService: PostalCodeLocationService,
     private val breedService: BreedService,
@@ -197,6 +199,8 @@ class PublicationService(
         if (publication.ownerId != user.id) {
             throw UnauthorizedException("Not your publication")
         }
+
+        photoService.deleteAllByPublication(id)
 
         publicationRepository.deleteById(id)
 

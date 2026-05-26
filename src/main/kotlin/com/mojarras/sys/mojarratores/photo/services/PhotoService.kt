@@ -49,11 +49,12 @@ class PhotoService(
 
         val photos = files.map { file ->
 
-            val url = cloudinaryService.upload(file)
+            val uploadResult = cloudinaryService.upload(file)
 
             Photo(
                 publicationId = publication.id!!,
-                url = url
+                url = uploadResult.url,
+                publicId = uploadResult.publicId
             )
         }
 
@@ -94,8 +95,42 @@ class PhotoService(
             throw UnauthorizedException("Not your publication")
         }
 
+        val deleted = cloudinaryService.delete(photo.publicId)
+
+        if (!deleted) {
+            logger.warn("Cloudinary delete failed for ${photo.publicId}")
+        }
+
         photoRepository.deleteById(photoId)
 
-        logger.info("Photo deleted: $photoId from publication: $publicationId")
+        val remainingPhotos = photoRepository.findAllByPublicationId(publicationId)
+
+        if (remainingPhotos.isEmpty()) {
+            val updatedPublication = publication.copy(status = PublicationStatus.DRAFT)
+            publicationRepository.save(updatedPublication)
+
+            logger.info("Publication $publicationId moved to DRAFT (no photos left)")
+        }
+
+        logger.info("Photo deleted: $photoId")
+    }
+
+    @Transactional
+    fun deleteAllByPublication(publicationId: Long) {
+
+        val photos = photoRepository.findAllByPublicationId(publicationId)
+
+        photos.forEach { photo ->
+
+            val deleted = cloudinaryService.delete(photo.publicId)
+
+            if (!deleted) {
+                logger.warn("Cloudinary delete failed for ${photo.publicId}")
+            }
+        }
+
+        photoRepository.deleteAll(photos)
+
+        logger.info("All photos deleted for publication: $publicationId")
     }
 }

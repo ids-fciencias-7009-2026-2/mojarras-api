@@ -5,11 +5,13 @@ import com.mojarras.sys.mojarratores.photo.entities.PhotoEntity
 
 fun Photo.toPhotoEntity() = PhotoEntity(
     publicationId = publicationId,
-    url = url
+    url = url,
+    publicId = publicId
 )
 
 fun PhotoEntity.toPhoto() = Photo(
     id = id,
     publicationId = publicationId,
-    url = url
+    url = url,
+    publicId = publicId
 )
