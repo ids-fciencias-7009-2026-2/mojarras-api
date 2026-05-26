@@ -157,12 +157,26 @@ class PublicationService(
             throw UnauthorizedException("Not your publication")
         }
 
+        val newType = request.type ?: existing.type
+        val newBreed = request.breed ?: existing.breed
+
+        val breedChanged =
+            newType != existing.type || newBreed != existing.breed
+
+        val newBreedInfoId = if (breedChanged) {
+            val breedInfo = breedService.getOrCreateBreedInfo(newType, newBreed)
+            breedInfo?.id
+        } else {
+            existing.breedInfoId
+        }
+
         val updated = existing.copy(
             petName     = request.petName     ?: existing.petName,
             description = request.description ?: existing.description,
-            type        = request.type        ?: existing.type,
-            breed       = request.breed       ?: existing.breed,
-            zipCode     = request.zipCode     ?: existing.zipCode
+            type        = newType,
+            breed       = newBreed,
+            zipCode     = request.zipCode     ?: existing.zipCode,
+            breedInfoId = newBreedInfoId
         )
 
         val saved = publicationRepository.save(updated)
