@@ -173,6 +173,11 @@ class PublicationService(
 
         val newType = request.type ?: existing.type
         val newBreed = request.breed ?: existing.breed
+        val newZipCode = request.zipCode ?: existing.zipCode
+
+        if (newZipCode != existing.zipCode) {
+            postalCodeLocationService.getOrCreate(newZipCode)
+        }
 
         val breedChanged =
             newType != existing.type || newBreed != existing.breed
@@ -189,7 +194,7 @@ class PublicationService(
             description = request.description ?: existing.description,
             type        = newType,
             breed       = newBreed,
-            zipCode     = request.zipCode     ?: existing.zipCode,
+            zipCode     = newZipCode,
             breedInfoId = newBreedInfoId
         )
 
