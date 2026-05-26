@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.publication.mapper
 
+import com.mojarras.sys.mojarratores.photo.dto.response.PhotoResponse
 import com.mojarras.sys.mojarratores.publication.domain.BreedInfo
 import com.mojarras.sys.mojarratores.publication.domain.Publication
 import com.mojarras.sys.mojarratores.publication.domain.PublicationStatus
@@ -59,7 +60,7 @@ fun Publication.toPublicationResponse() = PublicationResponse(
 
 // Domain(complement) → Response
 fun Publication.toPublicationWithPhotosResponse(
-    photos: List<String>,
+    photos: List<PhotoResponse>,
     breedInfo: BreedInfo?
 ) = PublicationWithPhotosResponse(
     id = requireNotNull(id),

@@ -4,6 +4,7 @@ import com.mojarras.sys.mojarratores.exception.BadRequestException
 import com.mojarras.sys.mojarratores.exception.NotFoundException
 import com.mojarras.sys.mojarratores.exception.UnauthorizedException
 import com.mojarras.sys.mojarratores.map.services.PostalCodeLocationService
+import com.mojarras.sys.mojarratores.photo.dto.response.PhotoResponse
 import com.mojarras.sys.mojarratores.photo.repositories.PhotoRepository
 import com.mojarras.sys.mojarratores.photo.services.PhotoService
 import com.mojarras.sys.mojarratores.publication.domain.BreedInfo
@@ -66,7 +67,7 @@ class PublicationService(
         return saved.toPublication()
     }
 
-    fun getById(id: Long): Triple<Publication, List<String>, BreedInfo?> {
+    fun getById(id: Long): Triple<Publication, List<PhotoResponse>, BreedInfo?> {
 
         val publication = publicationRepository.findById(id)
             .orElseThrow { NotFoundException("Publication not found") }
@@ -76,7 +77,12 @@ class PublicationService(
         }
 
         val photos = photoRepository.findAllByPublicationId(id)
-            .map { it.url }
+            .map {
+                PhotoResponse(
+                    id = it.id!!,
+                    url = it.url
+                )
+            }
 
         val breedInfo = publication.breedInfoId?.let {
             breedRepository.findById(it).orElse(null)?.toDomain()

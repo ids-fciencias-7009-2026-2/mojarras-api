@@ -1,5 +1,6 @@
 package com.mojarras.sys.mojarratores.publication.dto.response
 
+import com.mojarras.sys.mojarratores.photo.dto.response.PhotoResponse
 import com.mojarras.sys.mojarratores.publication.domain.PetType
 
 data class PublicationWithPhotosResponse(
@@ -10,5 +11,5 @@ data class PublicationWithPhotosResponse(
     val breed: String?,
     val breedInfo: BreedInfoResponse?,
     val zipCode: String,
-    val photos: List<String>
+    val photos: List<PhotoResponse>
 )
