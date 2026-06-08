@@ -47,6 +47,28 @@
           "response": []
         },
         {
+          "name": "Verify User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/verify?token={{verificationToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "users",
+                "verify"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{verificationToken}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Login",
           "event": [
             {
@@ -197,6 +219,52 @@
                 {
                   "key": "sort",
                   "value": "id,desc"
+                },
+                {
+                  "key": "type",
+                  "value": "DOG",
+                  "disabled": true
+                },
+                {
+                  "key": "breed",
+                  "value": "Labrador",
+                  "disabled": true
+                },
+                {
+                  "key": "zipCode",
+                  "value": "12345",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Publications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/me?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "publications",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
                 }
               ]
             }
@@ -243,6 +311,28 @@
               "raw": "{{baseUrl}}/publications/{{publicationId}}",
               "host": ["{{baseUrl}}"],
               "path": ["publications", "{{publicationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark as Adopted",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}/adopt",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "publications",
+                "{{publicationId}}",
+                "adopt"
+              ]
             }
           },
           "response": []
@@ -363,6 +453,106 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Map",
+      "item": [
+        {
+          "name": "Get Map Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/map?type=DOG",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "publications",
+                "map"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "DOG",
+                  "description": "Filtro opcional por tipo (DOG/CAT)",
+                  "disabled": true
+                },
+                {
+                  "key": "breed",
+                  "value": "Labrador",
+                  "description": "Filtro opcional por raza",
+                  "disabled": true
+                },
+                {
+                  "key": "zipCode",
+                  "value": "12345",
+                  "description": "Filtro opcional por código postal",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Publication Location",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/publications/{{publicationId}}/location",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "publications",
+                "{{publicationId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Breeds",
+      "item": [
+        {
+          "name": "Get Breeds",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/breeds?type=DOG",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "breeds"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "DOG",
+                  "description": "Requerido (DOG o CAT)"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -384,6 +574,10 @@
     },
     {
       "key": "photoId",
+      "value": ""
+    },
+    {
+      "key": "verificationToken",
       "value": ""
     }
   ]
